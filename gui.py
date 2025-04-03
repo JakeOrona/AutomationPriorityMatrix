@@ -280,16 +280,15 @@ class TestPrioritizationGUI:
             var.set(False)  # Reset to No
     
     def view_test_details(self):
-        """Show detailed view of the selected test"""
+        """Show detailed view of the selected test with integrated editing functionality"""
         selected_item = self.tree.selection()
         if not selected_item:
             messagebox.showinfo("Selection", "Please select a test to view")
             return
         
         # Get test ID from the selected item
-        test_id = self.model.find_test_id_by_name(
-            self.tree.item(selected_item[0], "values")[2]  # Use the third column (name) to find the test
-        )
+        test_name = self.tree.item(selected_item[0], "values")[2]
+        test_id = self.model.find_test_id_by_name(test_name)
         
         # Find the test in the model
         test = self.model.find_test_by_id(test_id)
@@ -299,7 +298,17 @@ class TestPrioritizationGUI:
         # Create detail window
         detail_window = tk.Toplevel(self.root)
         detail_window.title(f"Test Details: {test['name']}")
-        detail_window.geometry("600x600")  # Increased height for yes/no questions
+        detail_window.geometry("700x800")
+        
+        # Create variables for editing
+        edit_name_var = tk.StringVar(value=test["name"])
+        edit_desc_var = tk.StringVar(value=test["description"])
+        edit_ticket_id_var = tk.StringVar(value=test["ticket_id"])
+        edit_score_vars = {}
+        edit_yes_no_vars = {}
+        
+        # Flag to track if we're in edit mode
+        is_edit_mode = tk.BooleanVar(value=False)
         
         # Create scrollable frame
         main_frame = ttk.Frame(detail_window, padding=10)
@@ -320,85 +329,236 @@ class TestPrioritizationGUI:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        # Display basic info
-        
-        ttk.Label(scrollable_frame, text=f"Test Name: {test['name']}", font=("", 12)).grid(
-            row=0, column=0, columnspan=2, sticky=tk.W, pady=5
-        )
-        
-        ttk.Label(scrollable_frame, text=f"Description: {test['description']}", font=("", 12)).grid(
-            row=1, column=0, columnspan=2, sticky=tk.W, pady=5
-        )
+        # Function to refresh the view (used after saving or canceling edit)
+        def refresh_view():
+            # Clear the frame
+            for widget in scrollable_frame.winfo_children():
+                widget.destroy()
+            
+            # Get the updated test data
+            updated_test = self.model.find_test_by_id(test_id)
+            if not updated_test:
+                detail_window.destroy()
+                return
+            
+            # Re-populate with current test data
+            populate_view(updated_test)
 
-        ttk.Label(scrollable_frame, text=f"Ticket ID: {test['ticket_id']}", font=("", 12)).grid(
-            row=2, column=0, sticky=tk.W, pady=5
-        )
+            # Reset edit mode
+            is_edit_mode.set(False)
         
-        # Show raw and normalized scores
-        ttk.Label(scrollable_frame, text=f"Raw Score: {test['raw_score']} / 60", font=("", 12)).grid(
-            row=3, column=0, columnspan=2, sticky=tk.W, pady=5
-        )
-        ttk.Label(scrollable_frame, text=f"Priority Score: {test['total_score']} / 100", font=("", 12, "bold")).grid(
-            row=4, column=0, columnspan=2, sticky=tk.W, pady=5
-        )
-        row_index = 5
+        # Function to toggle between view and edit modes
+        def toggle_edit_mode():
+            is_edit_mode.set(not is_edit_mode.get())
+            refresh_view()
         
-        # Display yes/no questions if available
-        if hasattr(self.model, 'yes_no_questions') and test.get('yes_no_answers'):
-            ttk.Label(scrollable_frame, text="Additional Questions:", font=("", 12, "underline")).grid(
-                row=row_index, column=0, columnspan=2, sticky=tk.W, pady=10
-            )
-            row_index += 1
+        # Function to save edits
+        def save_edits():
+            # Gather updated scores
+            scores = {factor: var.get() for factor, var in edit_score_vars.items()}
             
-            for key, question_info in self.model.yes_no_questions.items():
-                answer = test['yes_no_answers'].get(key, False)
-                answer_text = "Yes" if answer else "No"
-                
-                question_frame = ttk.LabelFrame(scrollable_frame, text=question_info["question"])
-                question_frame.grid(row=row_index, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
-                
-                ttk.Label(question_frame, text=f"Answer: {answer_text}").grid(
-                    row=0, column=0, sticky=tk.W, padx=5, pady=2
+            # Gather updated yes/no answers
+            yes_no_answers = {key: var.get() for key, var in edit_yes_no_vars.items()}
+            
+            # Update test using the model
+            self.model.update_test(
+                test_id,
+                edit_name_var.get(),
+                edit_desc_var.get(),
+                edit_ticket_id_var.get(),
+                scores,
+                yes_no_answers
+            )
+            
+            # Update the main list
+            self.update_test_list()
+            
+            # Refresh the detail view
+            refresh_view()
+        
+        # Function to delete the test
+        def delete_test():
+            if messagebox.askyesno("Confirm Delete", 
+                                f"Are you sure you want to delete test '{test['name']}'?", 
+                                parent=detail_window):
+                self.model.delete_one_test(test_id)
+                self.update_test_list()
+                detail_window.destroy()
+        
+        # Function to populate the view
+        def populate_view(test_data):
+            row = 0
+            
+            # Basic info section with either labels or entry fields
+            if is_edit_mode.get():
+                # In edit mode - show input fields
+                ttk.Label(scrollable_frame, text="Test Name:").grid(row=row, column=0, sticky=tk.W, pady=5)
+                ttk.Entry(scrollable_frame, textvariable=edit_name_var, width=40).grid(
+                    row=row, column=1, sticky=tk.W, pady=5
                 )
-                ttk.Label(question_frame, text=f"Impact: {question_info['impact']}").grid(
-                    row=1, column=0, sticky=tk.W, padx=5, pady=2
-                )
+                row += 1
                 
-                row_index += 1
-        
-        # Display factor scores with descriptions
-        ttk.Label(scrollable_frame, text="Score Breakdown:", font=("", 12, "underline")).grid(
-            row=row_index, column=0, columnspan=2, sticky=tk.W, pady=10
-        )
-        row_index += 1
-        
-        for factor, score in test["scores"].items():
-            factor_name = self.model.factors[factor]["name"]
-            factor_weight = self.model.factors[factor]["weight"]
-            factor_description = self.model.score_options[factor][score]
-            factor_contribution = score * factor_weight
+                ttk.Label(scrollable_frame, text="Description:").grid(row=row, column=0, sticky=tk.W, pady=5)
+                ttk.Entry(scrollable_frame, textvariable=edit_desc_var, width=40).grid(
+                    row=row, column=1, sticky=tk.W, pady=5
+                )
+                row += 1
+                
+                ttk.Label(scrollable_frame, text="Ticket ID:").grid(row=row, column=0, sticky=tk.W, pady=5)
+                ttk.Entry(scrollable_frame, textvariable=edit_ticket_id_var, width=40).grid(
+                    row=row, column=1, sticky=tk.W, pady=5
+                )
+                row += 1
+                
+            else:
+                # In view mode - show labels
+                ttk.Label(scrollable_frame, text=f"Test Name: {test_data['name']}", font=("", 12)).grid(
+                    row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+                )
+                row += 1
+                
+                ttk.Label(scrollable_frame, text=f"Description: {test_data['description']}", font=("", 12)).grid(
+                    row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+                )
+                row += 1
+                
+                ttk.Label(scrollable_frame, text=f"Ticket ID: {test_data['ticket_id']}", font=("", 12)).grid(
+                    row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+                )
+                row += 1
             
-            # Create frame with border for each factor
-            factor_frame = ttk.LabelFrame(scrollable_frame, text=factor_name)
-            factor_frame.grid(row=row_index, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
+            # Show raw and normalized scores (always in view mode)
+            ttk.Label(scrollable_frame, text=f"Raw Score: {test_data['raw_score']} / 60", font=("", 12)).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+            )
+            row += 1
             
-            ttk.Label(factor_frame, text=f"Score: {score} - {factor_description}").grid(
-                row=0, column=0, sticky=tk.W, padx=5, pady=2
+            ttk.Label(scrollable_frame, text=f"Priority Score: {test_data['total_score']} / 100", font=("", 12, "bold")).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=5
             )
-            ttk.Label(factor_frame, text=f"Weight: {factor_weight}").grid(
-                row=1, column=0, sticky=tk.W, padx=5, pady=2
-            )
-            ttk.Label(factor_frame, text=f"Contribution: {factor_contribution} points").grid(
-                row=2, column=0, sticky=tk.W, padx=5, pady=2
+            row += 1
+            
+            # Priority category with color
+            priority_frame = ttk.Frame(scrollable_frame)
+            priority_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=5)
+            
+            ttk.Label(priority_frame, text="Priority: ", font=("", 12)).pack(side=tk.LEFT)
+            
+            priority_value = tk.Label(
+                priority_frame, 
+                text=test_data['priority'],
+                font=("", 12, "bold")
             )
             
-            row_index += 1
+            # Set color based on priority
+            if test_data['priority'] == "High":
+                priority_value.configure(foreground="green")
+            elif test_data['priority'] == "Medium":
+                priority_value.configure(foreground="orange")
+            else:  # Low
+                priority_value.configure(foreground="red")
+            
+            priority_value.pack(side=tk.LEFT)
+            row += 1
+            
+            # Display factor scores
+            ttk.Label(scrollable_frame, text="Score Breakdown:", font=("", 12, "underline")).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=10
+            )
+            row += 1
+            
+            for factor, details in self.model.factors.items():
+                current_score = test_data["scores"].get(factor, 3)  # Default to 3 if missing
+                
+                # Create frame with border for each factor
+                factor_frame = ttk.LabelFrame(scrollable_frame, text=details["name"])
+                factor_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
+                
+                if is_edit_mode.get():
+                    # In edit mode - show radio buttons
+                    edit_score_vars[factor] = tk.IntVar(value=current_score)
+                    
+                    for score, label in self.model.score_options[factor].items():
+                        rb = ttk.Radiobutton(
+                            factor_frame, 
+                            text=f"{score} - {label}", 
+                            variable=edit_score_vars[factor], 
+                            value=score
+                        )
+                        rb.pack(anchor=tk.W)
+                else:
+                    # In view mode - show current values
+                    factor_description = self.model.score_options[factor][current_score]
+                    factor_weight = details["weight"]
+                    factor_contribution = current_score * factor_weight
+                    
+                    ttk.Label(factor_frame, text=f"Score: {current_score} - {factor_description}").grid(
+                        row=0, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                    ttk.Label(factor_frame, text=f"Weight: {factor_weight}").grid(
+                        row=1, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                    ttk.Label(factor_frame, text=f"Contribution: {factor_contribution} points").grid(
+                        row=2, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                
+                row += 1
+            
+            # Display yes/no questions if available
+            if hasattr(self.model, 'yes_no_questions') and len(self.model.yes_no_questions) > 0:
+                ttk.Label(scrollable_frame, text="Additional Questions:", font=("", 12, "underline")).grid(
+                    row=row, column=0, columnspan=2, sticky=tk.W, pady=10
+                )
+                row += 1
+                
+                for key, question_info in self.model.yes_no_questions.items():
+                    current_answer = test_data.get('yes_no_answers', {}).get(key, False)
+                    
+                    question_frame = ttk.LabelFrame(scrollable_frame, text=question_info["question"])
+                    question_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
+                    
+                    if is_edit_mode.get():
+                        # In edit mode - show checkbutton
+                        edit_yes_no_vars[key] = tk.BooleanVar(value=current_answer)
+                        cb = ttk.Checkbutton(
+                            question_frame,
+                            text="Yes",
+                            variable=edit_yes_no_vars[key]
+                        )
+                        cb.grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+                        
+                        ttk.Label(question_frame, text=f"Impact: {question_info['impact']}").grid(
+                            row=1, column=0, sticky=tk.W, padx=5, pady=2
+                        )
+                    else:
+                        # In view mode - show current value
+                        answer_text = "Yes" if current_answer else "No"
+                        ttk.Label(question_frame, text=f"Answer: {answer_text}").grid(
+                            row=0, column=0, sticky=tk.W, padx=5, pady=2
+                        )
+                        ttk.Label(question_frame, text=f"Impact: {question_info['impact']}").grid(
+                            row=1, column=0, sticky=tk.W, padx=5, pady=2
+                        )
+                    
+                    row += 1
+            
+            # Add action buttons
+            button_frame = ttk.Frame(scrollable_frame)
+            button_frame.grid(row=row, column=0, columnspan=2, pady=15)
+            
+            if is_edit_mode.get():
+                # Buttons for edit mode
+                ttk.Button(button_frame, text="Save Changes", command=save_edits).pack(side=tk.LEFT, padx=5)
+                ttk.Button(button_frame, text="Cancel", command=refresh_view).pack(side=tk.LEFT, padx=5)
+            else:
+                # Buttons for view mode
+                ttk.Button(button_frame, text="Edit Test", command=toggle_edit_mode).pack(side=tk.LEFT, padx=5)
+                ttk.Button(button_frame, text="Delete Test", command=delete_test).pack(side=tk.LEFT, padx=5)
+                ttk.Button(button_frame, text="Close", command=detail_window.destroy).pack(side=tk.LEFT, padx=5)
         
-        # Add close button
-        ttk.Button(scrollable_frame, text="Close", command=detail_window.destroy).grid(
-            row=row_index, column=0, columnspan=2, pady=15
-        )
-    
+        # Initial population of the view
+        populate_view(test)
+        
     def edit_test(self):
         """Edit the selected test"""
         selected_item = self.tree.selection()
@@ -491,6 +651,102 @@ class TestPrioritizationGUI:
         ttk.Button(button_frame, text="Save Changes", command=save_edit).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Cancel", command=cancel_edit).pack(side=tk.LEFT, padx=5)
     
+    def edit_test_by_id(self, test_id):
+        """Edit a test by its ID (used from detail window)"""
+        # Find the test in the model
+        test = self.model.find_test_by_id(test_id)
+        if not test:
+            messagebox.showerror("Error", "Test not found")
+            return
+        
+        # Populate form with test data
+        self.test_name_var.set(test["name"])
+        self.test_id_var.set(test["id"])
+        self.test_desc_var.set(test["description"])
+        self.ticket_id_var.set(test["ticket_id"])
+        self.priority_var.set(test["priority"])
+        
+        for factor, score in test["scores"].items():
+            if factor in self.score_vars:
+                self.score_vars[factor].set(score)
+        
+        # Set yes/no question values
+        if hasattr(self.model, 'yes_no_questions') and 'yes_no_answers' in test:
+            for key in self.yes_no_vars:
+                self.yes_no_vars[key].set(test['yes_no_answers'].get(key, False))
+        
+        # Create edit window with save button
+        edit_window = tk.Toplevel(self.root)
+        edit_window.title(f"Edit Test: {test['name']}")
+        
+        edit_frame = ttk.Frame(edit_window, padding=10)
+        edit_frame.pack(fill=tk.BOTH, expand=True)
+        
+        ttk.Label(
+            edit_frame,
+            text="Editing test. Please update values in the main form and click Save.",
+            font=("", 12)
+        ).pack(pady=10)
+        
+        def save_edit():
+            # Gather updated scores
+            scores = {factor: var.get() for factor, var in self.score_vars.items()}
+            
+            # Gather updated yes/no answers
+            yes_no_answers = {key: var.get() for key, var in self.yes_no_vars.items()}
+            
+            # Update test using the model
+            self.model.update_test(
+                self.test_id_var.get(),
+                self.test_name_var.get(),
+                self.test_desc_var.get(),
+                self.ticket_id_var.get(),
+                scores,
+                yes_no_answers,
+                self.priority_var.get()
+            )
+            
+            # Update display
+            self.update_test_list()
+            
+            # Clear form and reset ID
+            self.clear_form()
+            self.test_id_var.set(self.model.current_id)
+            
+            # Close edit window
+            edit_window.destroy()
+        
+        def cancel_edit():
+            # Clear form and reset ID
+            self.clear_form()
+            self.test_id_var.set(self.model.current_id)
+            edit_window.destroy()
+        
+        button_frame = ttk.Frame(edit_frame)
+        button_frame.pack(pady=10)
+    
+        ttk.Button(button_frame, text="Save Changes", command=save_edit).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Cancel", command=cancel_edit).pack(side=tk.LEFT, padx=5)
+    
+    def edit_test(self):
+        """Edit the selected test from the list view"""
+        selected_item = self.tree.selection()
+        if not selected_item:
+            messagebox.showinfo("Selection", "Please select a test to edit")
+            return
+        
+        # Get test ID from the selected item's internal ID
+        item_id = selected_item[0]  # Get the first selected item's ID
+        test_name = self.tree.item(item_id, "values")[2]  # Use the third column (name) to find the test
+        
+        # Find the test in the model
+        test_id = self.model.find_test_id_by_name(test_name)
+        if not test_id:
+            messagebox.showerror("Error", "Test not found")
+            return
+        
+        self.edit_test_by_id(test_id)
+        
     def delete_all_tests(self):
         """Delete all tests"""
 

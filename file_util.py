@@ -35,7 +35,7 @@ class FileOperations:
             sorted_tests = sorted(tests, key=lambda x: x["total_score"], reverse=True)
             
             # Create field names (column headers)
-            field_names = ["Test ID", "Test Name", "Description", "Raw Score", "Total Score (100-point)"]
+            field_names = ["Test ID", "Ticket ID", "Test Name", "Description", "Raw Score", "Total Score (100-point)"]
             
             # Add factor score headers
             for factor_key, factor_info in factors.items():
@@ -61,6 +61,7 @@ class FileOperations:
             for test in sorted_tests:
                 row = {
                     "Test ID": test["id"],
+                    "Ticket ID": test.get("ticket_id", "N/A"),
                     "Test Name": test["name"],
                     "Description": test["description"],
                     "Raw Score": test.get("raw_score", "N/A"),
@@ -248,7 +249,7 @@ class FileOperations:
         guide += "How scores are calculated:\n"
         guide += "-" * 50 + "\n"
         guide += "1. Each factor score is multiplied by its weight\n"
-        guide += "2. These weighted scores are summed to get a raw score (max 60)\n"
+        guide += "2. These weighted scores are summed to get a raw score (max 70)\n"
         guide += "3. The raw score is converted to a 100-point scale\n\n"
         guide += "Formula: Final Score = (Raw Score / 70) × 100\n\n"
         guide += "Maximum possible score: 100\n"

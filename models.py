@@ -121,9 +121,9 @@ class TestPrioritizationModel:
             str: Priority category ('High', 'Medium', or 'Low')
         """
         # Define thresholds for categories
-        if score >= 80:
+        if score >= 85:
             return "High"
-        elif score >= 50:
+        elif score >= 55:
             return "Medium"
         else:
             return "Low"
