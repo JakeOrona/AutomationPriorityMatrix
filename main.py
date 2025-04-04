@@ -2,8 +2,8 @@
 main.py - Main entry point for the test prioritization application
 """
 import tkinter as tk
-from models import TestPrioritizationModel
-from gui import TestPrioritizationGUI
+from models.prioritization import TestPrioritizationModel
+from views.main_window import MainWindow
 
 def main():
     """
@@ -11,12 +11,14 @@ def main():
     """
     # Create the root window
     root = tk.Tk()
+    root.title("Test Automation Prioritization Tool")
+    root.geometry("1600x800")
     
     # Create the model
     model = TestPrioritizationModel()
     
-    # Create the GUI with the model
-    app = TestPrioritizationGUI(root, model)
+    # Create the main application window
+    app = MainWindow(root, model)
     
     # Start the main event loop
     root.mainloop()
