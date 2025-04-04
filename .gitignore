@@ -1,0 +1,10 @@
+/models/*.pyc
+/models/__pycache__/
+/utils/*.pyc
+/utils/__pycache__/
+/views/*.pyc
+/views/__pycache__/
+/views/reports/*.pyc
+/views/reports/__pycache__/
+/views/reports/*.pyc
+/views/reports/__pycache__/
