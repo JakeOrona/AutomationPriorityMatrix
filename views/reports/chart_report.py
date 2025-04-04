@@ -20,26 +20,51 @@ class ChartReportView(BaseReportView):
             parent: The parent window
             model: The prioritization model
         """
-        # Try to import matplotlib before initialization
+        # Check if matplotlib is available before initializing
         self.matplotlib_available = ChartUtils.is_matplotlib_available()
+        if not self.matplotlib_available:
+            # Configure parent window minimally since we'll show an error
+            parent.title("Test Prioritization Graphical Report")
+            parent.geometry("600x300")
+            
+            # Create a frame for the error message
+            main_frame = ttk.Frame(parent, padding=20)
+            main_frame.pack(fill=tk.BOTH, expand=True)
+            
+            # Show the error message
+            ttk.Label(
+                main_frame,
+                text="Matplotlib is required for graphical reports.\n\n" +
+                    "Please install it using:\n" +
+                    "pip install matplotlib",
+                font=("", 12)
+            ).pack(pady=20)
+            
+            # Add a close button
+            button_frame = ttk.Frame(parent)
+            button_frame.pack(fill=tk.X, pady=10, padx=10)
+            ttk.Button(
+                button_frame, 
+                text="Close", 
+                command=parent.destroy
+            ).pack(side=tk.RIGHT, padx=5)
+            
+            # Store references to frames for potential later use
+            self.parent = parent
+            self.model = model
+            self.main_frame = main_frame
+            self.button_frame = button_frame
+            return
         
-        # Call parent class constructor with title
+        # If matplotlib is available, proceed with normal initialization
         super().__init__(parent, model, "Test Prioritization Graphical Report")
-        
-        # Adjust window size for charts
-        self.parent.geometry("1200x900")
     
     def create_report_content(self):
         """Create the graphical report content"""
-        # Check if data is available
-        if not self.check_if_data_available():
-            return
-        
-        # Check if matplotlib is available
+        # If matplotlib isn't available, we've already shown an error in __init__
         if not self.matplotlib_available:
-            self.show_matplotlib_error()
             return
-        
+            
         # Import necessary modules for chart display
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
         
@@ -99,11 +124,6 @@ class ChartReportView(BaseReportView):
         canvas4.get_tk_widget().pack(fill=tk.BOTH, expand=True)
         
         # Add export buttons to button frame
-        # Make sure button_frame exists (if not created by parent class)
-        if not hasattr(self, 'button_frame'):
-            self.button_frame = ttk.Frame(self.parent)
-            self.button_frame.pack(fill=tk.X, pady=10, padx=10)
-        
         ttk.Button(
             self.button_frame, 
             text="Export Current Graph", 
@@ -116,22 +136,9 @@ class ChartReportView(BaseReportView):
             command=self.export_all_graphs
         ).pack(side=tk.LEFT, padx=5)
     
-    def show_matplotlib_error(self):
-        """Show error message if matplotlib is not available"""
-        error_frame = ttk.Frame(self.main_frame, padding=20)
-        error_frame.pack(fill=tk.BOTH, expand=True)
-        
-        ttk.Label(
-            error_frame,
-            text="Matplotlib is required for graphical reports.\n\n" +
-                "Please install it using:\n" +
-                "pip install matplotlib",
-            font=("", 12)
-        ).pack(pady=20)
-    
     def export_current_graph(self):
         """Export the current graph"""
-        if not self.matplotlib_available:
+        if not self.matplotlib_available or not hasattr(self, 'notebook'):
             return
             
         # Get the current tab name
@@ -178,7 +185,7 @@ class ChartReportView(BaseReportView):
     
     def export_all_graphs(self):
         """Export all graphs"""
-        if not self.matplotlib_available:
+        if not self.matplotlib_available or not hasattr(self, 'figures'):
             return
             
         # Ask for directory

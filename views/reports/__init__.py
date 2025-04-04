@@ -19,18 +19,19 @@ class BaseReportView:
         """
         self.parent = parent
         self.model = model
+
+        # Check if data is available
+        if not self.check_if_data_available():
+            return
         
         # Configure parent window
         self.parent.title(title)
-        self.parent.geometry("800x600")
+        self.parent.geometry("1200x900")
         
         # Create main container
         self.main_frame = ttk.Frame(self.parent, padding=10)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
-        
-        # This must be implemented by child classes
-        self.create_report_content()
-        
+
         # Create button frame - this should be used by all child classes
         self.button_frame = ttk.Frame(self.parent)
         self.button_frame.pack(fill=tk.X, pady=10, padx=10)
@@ -41,6 +42,9 @@ class BaseReportView:
             text="Close", 
             command=self.parent.destroy
         ).pack(side=tk.RIGHT, padx=5)
+        
+        # This must be implemented by child classes
+        self.create_report_content()
     
     def create_report_content(self):
         """

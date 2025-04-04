@@ -22,10 +22,6 @@ class TextReportView(BaseReportView):
     
     def create_report_content(self):
         """Create the text report content"""
-        # Check if data is available
-        if not self.check_if_data_available():
-            return
-        
         # Get priority tiers
         priority_tiers = self.model.get_priority_tiers()
         
@@ -48,7 +44,7 @@ class TextReportView(BaseReportView):
         
         # Make text widget read-only
         self.text_widget.configure(state="disabled")
-        
+
         # Add export button to button frame
         ttk.Button(
             self.button_frame, 

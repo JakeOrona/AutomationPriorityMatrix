@@ -203,9 +203,9 @@ class TestPrioritizationModel:
         sorted_tests = self.get_sorted_tests()
         
         # Calculate thresholds
-        max_score = max(test["total_score"] for test in self.tests)
-        high_threshold = max_score * 0.8
-        medium_threshold = max_score * 0.5
+        max_score = 100
+        high_threshold = max_score * 0.85
+        medium_threshold = max_score * 0.55
         
         # Group tests by priority
         high_priority = [t for t in sorted_tests if t["total_score"] >= high_threshold]
