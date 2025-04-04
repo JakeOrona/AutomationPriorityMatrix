@@ -94,7 +94,7 @@ class ChartUtils:
         
         if scores:
             # Create histogram
-            bins = np.linspace(0, 100, 11)  # 10 bins from 0 to 100
+            bins = np.linspace(0, 100, 21)  # 20 bins from 0 to 100
             ax.hist(scores, bins=bins, color='skyblue', edgecolor='black')
             ax.set_title('Test Score Distribution')
             ax.set_xlabel('Priority Score')
@@ -102,8 +102,8 @@ class ChartUtils:
             ax.set_xticks(bins)
             
             # Calculate threshold values
-            max_score = max(scores)
-            high_threshold = max_score * 0.8
+            max_score = 100
+            high_threshold = max_score * 0.85
             medium_threshold = max_score * 0.5
             
             # Add vertical lines for threshold values
