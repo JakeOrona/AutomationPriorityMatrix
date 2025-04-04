@@ -13,7 +13,7 @@ This application helps QA teams decide which manual tests to automate first by c
    - Implements scoring algorithms
    - Provides priority analysis
 
-2. **file_operations.py**: Handles all file-related operations
+2. **file_util.py**: Handles all file-related operations
    - CSV import/export
    - Report generation
    - Documentation generation
@@ -30,44 +30,44 @@ This application helps QA teams decide which manual tests to automate first by c
 ## Features
 
 - Score and prioritize tests based on multiple weighted factors:
-  - Execution Frequency (weight: 3)
-  - Business Impact (weight: 3)
+  - Regression Frequency (weight: 3)
+  - Customer Impact (weight: 3)
   - Manual Test Effort (weight: 2)
-  - Stability (weight: 2)
   - Automation Complexity (weight: 2)
+  - Existing Framework (weight: 2)
+  - Angular Framework (weight: 1)
+  - Repetitive (weight: 1)
 
 - View tests ranked by priority score
-- View detailed test information and score breakdown
+- View and edit detailed test information directly in the detail view
+- Delete tests from the detail view
 - Import/export test data to/from CSV files
 - Generate prioritized test reports with high/medium/low priority tiers
+- Generate graphical reports with multiple visualizations:
+  - Priority Distribution (pie chart)
+  - Score Distribution (histogram)
+  - Factor Contribution (bar chart)
+  - Top Tests (horizontal bar chart)
+- Export reports and charts to various formats (PNG, JPEG, PDF, SVG)
 - Scoring guide for consistent evaluation
 
 ## Requirements
 
 - Python 3.6 or higher
-- pandas
 - tkinter (usually included with Python)
+- matplotlib (for graphical reports)
+- pandas (optional, for enhanced CSV handling)
 
 ## Installation
 
 1. Ensure you have Python installed
 2. Install required dependencies:
-   ```
-   pip install pandas
-   ```
+   ```pip install matplotlib pandas```
 3. Clone or download this repository
 
 ## Usage
 
 Run the application with:
-```
-python main.py
-```
-
-## Future Improvements
-
-- Add unit tests
-- Implement data visualization (charts, graphs)
-- Add user authentication and multiple projects
-- Create a web interface
-- Add more scoring factors
+```python main.py```
+or
+```python3 main.py```
