@@ -4,6 +4,7 @@ gui.py - Contains the GUI components for the test prioritization application
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from datetime import datetime
+import os
 from models import TestPrioritizationModel
 from file_util import FileOperations
 
@@ -70,7 +71,8 @@ class TestPrioritizationGUI:
         
         # Reports menu
         report_menu = tk.Menu(menubar, tearoff=0)
-        report_menu.add_command(label="Prioritization Report", command=self.show_priority_report)
+        report_menu.add_command(label="Text Priority Report", command=self.show_priority_report)
+        report_menu.add_command(label="Graphical Report", command=self.show_graphical_report)
         menubar.add_cascade(label="Reports", menu=report_menu)
         
         # Help menu
@@ -897,6 +899,293 @@ class TestPrioritizationGUI:
         ttk.Button(button_frame, text="Export Report", command=export_report).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Close", command=report_window.destroy).pack(side=tk.RIGHT, padx=5)
     
+    def show_graphical_report(self):
+        """Show a graphical report of test prioritization data with export capability"""
+        if not self.model.tests:
+            messagebox.showinfo("Report", "No tests available for graphical report")
+            return
+        
+        # Create report window
+        report_window = tk.Toplevel(self.root)
+        report_window.title("Test Prioritization Graphical Report")
+        report_window.geometry("1200x900")
+        
+        # Create notebook for multiple graphs
+        notebook = ttk.Notebook(report_window)
+        notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Try to import matplotlib for plotting
+        try:
+            import matplotlib.pyplot as plt
+            from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+            from matplotlib.figure import Figure
+            import numpy as np
+            
+            # Dictionary to store figures for export
+            figures = {}
+            
+            # 1. Priority Distribution Tab
+            priority_frame = ttk.Frame(notebook)
+            notebook.add(priority_frame, text="Priority Distribution")
+            
+            fig1 = Figure(figsize=(8, 6))
+            ax1 = fig1.add_subplot(111)
+            figures["Priority Distribution"] = fig1
+            
+            # Count tests by priority
+            priority_counts = {"High": 0, "Medium": 0, "Low": 0}
+            for test in self.model.tests:
+                priority_counts[test["priority"]] += 1
+            
+            # Create pie chart
+            labels = list(priority_counts.keys())
+            sizes = list(priority_counts.values())
+            colors = ['green', 'orange', 'red']
+            explode = (0.1, 0, 0)  # Explode the 1st slice (High priority)
+            
+            # Plot if there's data
+            if sum(sizes) > 0:
+                ax1.pie(sizes, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%',
+                    shadow=True, startangle=90)
+                ax1.axis('equal')  # Equal aspect ratio ensures the pie chart is circular
+                ax1.set_title('Test Priority Distribution')
+            else:
+                ax1.text(0.5, 0.5, "No data available", horizontalalignment='center',
+                        verticalalignment='center', transform=ax1.transAxes)
+            
+            # Add the plot to the frame
+            canvas1 = FigureCanvasTkAgg(fig1, master=priority_frame)
+            canvas1.draw()
+            canvas1.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+            
+            # 2. Score Distribution Tab
+            score_frame = ttk.Frame(notebook)
+            notebook.add(score_frame, text="Score Distribution")
+            
+            fig2 = Figure(figsize=(8, 6))
+            ax2 = fig2.add_subplot(111)
+            figures["Score Distribution"] = fig2
+            
+            # Get scores for histogram
+            scores = [test["total_score"] for test in self.model.tests]
+            
+            if scores:
+                # Create histogram
+                bins = np.linspace(0, 100, 11)  # 10 bins from 0 to 100
+                ax2.hist(scores, bins=bins, color='skyblue', edgecolor='black')
+                ax2.set_title('Test Score Distribution')
+                ax2.set_xlabel('Priority Score')
+                ax2.set_ylabel('Number of Tests')
+                ax2.set_xticks(bins)
+                
+                # Add vertical lines for threshold values
+                priority_tiers = self.model.get_priority_tiers()
+                ax2.axvline(x=priority_tiers["high_threshold"], color='green', linestyle='--', 
+                            label=f'High Threshold ({priority_tiers["high_threshold"]:.1f})')
+                ax2.axvline(x=priority_tiers["medium_threshold"], color='orange', linestyle='--', 
+                            label=f'Medium Threshold ({priority_tiers["medium_threshold"]:.1f})')
+                ax2.legend()
+            else:
+                ax2.text(0.5, 0.5, "No data available", horizontalalignment='center',
+                        verticalalignment='center', transform=ax2.transAxes)
+            
+            # Add the plot to the frame
+            canvas2 = FigureCanvasTkAgg(fig2, master=score_frame)
+            canvas2.draw()
+            canvas2.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+            
+            # 3. Factor Contribution Tab
+            factor_frame = ttk.Frame(notebook)
+            notebook.add(factor_frame, text="Factor Contribution")
+            
+            fig3 = Figure(figsize=(8, 6))
+            ax3 = fig3.add_subplot(111)
+            figures["Factor Contribution"] = fig3
+            
+            if self.model.tests:
+                # Calculate average scores for each factor
+                factor_avgs = {}
+                factor_names = {}
+                
+                for factor, info in self.model.factors.items():
+                    factor_scores = [test["scores"].get(factor, 0) for test in self.model.tests]
+                    factor_avgs[factor] = sum(factor_scores) / len(self.model.tests)
+                    factor_names[factor] = info["name"]
+                
+                # Create bar chart
+                factors = list(factor_avgs.keys())
+                avg_scores = [factor_avgs[f] for f in factors]
+                bar_labels = [factor_names[f] for f in factors]
+                
+                bars = ax3.bar(range(len(factors)), avg_scores, color='lightblue')
+                ax3.set_xticks(range(len(factors)))
+                ax3.set_xticklabels(bar_labels, rotation=45, ha='right')
+                ax3.set_title('Average Score by Factor')
+                ax3.set_ylabel('Average Score (1-5)')
+                ax3.set_ylim(0, 5)
+                
+                # Add the score values on top of bars
+                for bar in bars:
+                    height = bar.get_height()
+                    ax3.text(bar.get_x() + bar.get_width()/2., height + 0.1,
+                            f'{height:.1f}', ha='center', va='bottom')
+                
+                fig3.tight_layout()  # Adjust layout for rotated labels
+            else:
+                ax3.text(0.5, 0.5, "No data available", horizontalalignment='center',
+                        verticalalignment='center', transform=ax3.transAxes)
+            
+            # Add the plot to the frame
+            canvas3 = FigureCanvasTkAgg(fig3, master=factor_frame)
+            canvas3.draw()
+            canvas3.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+            
+            # 4. Top Tests Tab
+            top_tests_frame = ttk.Frame(notebook)
+            notebook.add(top_tests_frame, text="Top Tests")
+            
+            fig4 = Figure(figsize=(8, 6))
+            ax4 = fig4.add_subplot(111)
+            figures["Top Tests"] = fig4
+            
+            if self.model.tests:
+                # Get sorted tests
+                sorted_tests = self.model.get_sorted_tests()
+                
+                # Take top 10 or fewer
+                top_n = min(10, len(sorted_tests))
+                top_tests = sorted_tests[:top_n]
+                
+                # Create horizontal bar chart
+                test_names = [test["name"] if len(test["name"]) <= 20 else test["name"][:17] + "..." 
+                            for test in top_tests]
+                test_scores = [test["total_score"] for test in top_tests]
+                
+                # Reverse lists for bottom-to-top display
+                test_names.reverse()
+                test_scores.reverse()
+                
+                # Create color map based on priority
+                colors = []
+                for test in reversed(top_tests):
+                    if test["priority"] == "High":
+                        colors.append("green")
+                    elif test["priority"] == "Medium":
+                        colors.append("orange")
+                    else:
+                        colors.append("red")
+                
+                # Plot horizontal bars
+                bars = ax4.barh(range(len(test_names)), test_scores, color=colors)
+                ax4.set_yticks(range(len(test_names)))
+                ax4.set_yticklabels(test_names)
+                ax4.set_title(f'Top {top_n} Tests by Priority Score')
+                ax4.set_xlabel('Priority Score')
+                ax4.set_xlim(0, 100)
+                
+                # Add the score values at the end of bars
+                for i, bar in enumerate(bars):
+                    width = bar.get_width()
+                    ax4.text(width + 1, bar.get_y() + bar.get_height()/2.,
+                            f'{width:.1f}', va='center')
+                
+                fig4.tight_layout()  # Adjust layout for long test names
+            else:
+                ax4.text(0.5, 0.5, "No data available", horizontalalignment='center',
+                        verticalalignment='center', transform=ax4.transAxes)
+            
+            # Add the plot to the frame
+            canvas4 = FigureCanvasTkAgg(fig4, master=top_tests_frame)
+            canvas4.draw()
+            canvas4.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+            
+            # Function to export the current graph
+            def export_current_graph():
+                # Get the current tab name
+                current_tab = notebook.tab(notebook.select(), "text")
+                
+                if current_tab in figures:
+                    # Ask for save location
+                    filename = filedialog.asksaveasfilename(
+                        defaultextension=".png",
+                        filetypes=[
+                            ("PNG files", "*.png"),
+                            ("JPEG files", "*.jpg"),
+                            ("PDF files", "*.pdf"),
+                            ("SVG files", "*.svg"),
+                            ("All files", "*.*")
+                        ],
+                        title=f"Export {current_tab} Graph"
+                    )
+                    
+                    if filename:
+                        # Get file extension to determine format
+                        extension = filename.split(".")[-1].lower()
+                        
+                        try:
+                            # Save the figure
+                            figures[current_tab].savefig(filename, dpi=300, bbox_inches='tight', 
+                                                        format=extension if extension != "jpg" else "jpeg")
+                            messagebox.showinfo("Export Successful", f"Graph exported to {filename}")
+                        except Exception as e:
+                            messagebox.showerror("Export Error", f"Error saving graph: {str(e)}")
+                            
+            # Function to export all graphs
+            def export_all_graphs():
+                # Ask for directory
+                directory = filedialog.askdirectory(title="Select Directory for Exporting All Graphs")
+                
+                if directory:
+                    # Generate timestamp for filenames
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    
+                    # Export each graph
+                    success_count = 0
+                    for graph_name, figure in figures.items():
+                        # Create filename with timestamp
+                        safe_name = graph_name.replace(" ", "_").lower()
+                        filename = os.path.join(directory, f"{safe_name}_{timestamp}.png")
+                        
+                        try:
+                            # Save the figure
+                            figure.savefig(filename, dpi=300, bbox_inches='tight')
+                            success_count += 1
+                        except Exception as e:
+                            messagebox.showerror("Export Error", 
+                                            f"Error saving {graph_name}: {str(e)}")
+                    
+                    if success_count > 0:
+                        messagebox.showinfo("Export Successful", 
+                                        f"Exported {success_count} graphs to {directory}")
+            
+            # Create export buttons
+            button_frame = ttk.Frame(report_window)
+            button_frame.pack(fill=tk.X, pady=10)
+            
+            ttk.Button(button_frame, text="Export Current Graph", 
+                    command=export_current_graph).pack(side=tk.LEFT, padx=5)
+            ttk.Button(button_frame, text="Export All Graphs", 
+                    command=export_all_graphs).pack(side=tk.LEFT, padx=5)
+            ttk.Button(button_frame, text="Close", 
+                    command=report_window.destroy).pack(side=tk.RIGHT, padx=5)
+            
+        except ImportError:
+            # If matplotlib is not available, show error message
+            error_frame = ttk.Frame(report_window, padding=20)
+            error_frame.pack(fill=tk.BOTH, expand=True)
+            
+            ttk.Label(
+                error_frame,
+                text="Matplotlib is required for graphical reports.\n\n" +
+                    "Please install it using:\n" +
+                    "pip install matplotlib",
+                font=("", 12)
+            ).pack(pady=20)
+            
+            # Just add close button
+            ttk.Button(report_window, text="Close", 
+                    command=report_window.destroy).pack(pady=10)
+        
     def show_about(self):
         """Show the about dialog"""
         about_text = "Test Automation Prioritization Tool\n\n"
