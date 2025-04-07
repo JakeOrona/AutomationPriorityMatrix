@@ -32,7 +32,7 @@ class TestPrioritizationModel:
         """Get yes/no questions from the scoring system"""
         return self.scoring.yes_no_questions
     
-    def add_test(self, id, name, description, ticket_id, scores, yes_no_answers=None, priority_category=None):
+    def add_test(self, name, description, ticket_id, scores, yes_no_answers=None, priority_category=None):
         """
         Add a new test with calculated priority scores
         
@@ -49,7 +49,7 @@ class TestPrioritizationModel:
             Test: The newly created test object
         """
         # Create a new Test instance
-        test = TestModel(id, name, description, ticket_id, scores, yes_no_answers)
+        test = TestModel(self.current_id, name, description, ticket_id, scores, yes_no_answers)
         
         # Calculate scores
         raw_score, normalized_score = self.scoring.calculate_score(scores, yes_no_answers)
@@ -263,7 +263,7 @@ class TestPrioritizationModel:
             priority_category = self.scoring.get_priority_category(normalized_score)
             
             # Create test object
-            test_id = data.get("Test ID", f"{self.current_id}")
+            test_id = data.get("Test ID", int(self.current_id))
             
             test = {
                 "id": test_id,
