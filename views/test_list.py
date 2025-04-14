@@ -27,11 +27,11 @@ class TestList:
         
         # Define color scheme for priority levels
         self.priority_colors = {
-            "Highest": "#DC143C",  # Crimson
-            "High": "#FF6347",      # Tomato
-            "Medium": "#FFA500",   # Orange
-            "Low": "#228B22",     # Forest Green
-            "Lowest": "#4fc3f7"    # light blue
+            "Highest": "#D50000",  # Red
+            "High": "#FF6D00",      # Orange
+            "Medium": "#FFD600",   # Gold
+            "Low": "#00C853",     # Green
+            "Lowest": "#18FFFF"    # light blue
         }
         
         # Create the list view
