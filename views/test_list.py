@@ -25,6 +25,15 @@ class TestList:
         self.on_edit = on_edit
         self.on_delete = on_delete
         
+        # Define color scheme for priority levels
+        self.priority_colors = {
+            "Highest": "#DC143C",  # Crimson
+            "High": "#FF6347",      # Tomato
+            "Medium": "#FFA500",   # Orange
+            "Low": "#228B22",     # Forest Green
+            "Lowest": "#4fc3f7"    # light blue
+        }
+        
         # Create the list view
         self.create_list_view()
     
@@ -71,6 +80,10 @@ class TestList:
         
         # Bind double-click event to view details
         self.tree.bind("<Double-1>", lambda e: self.view_details())
+        
+        # Create custom tags for colored priority and score columns
+        for priority, color in self.priority_colors.items():
+            self.tree.tag_configure(priority, foreground=color)
     
     def update_list(self):
         """Update the test list display with sorted tests"""
@@ -83,13 +96,16 @@ class TestList:
         
         for i, test in enumerate(sorted_tests):
             rank = i + 1
-            self.tree.insert("", "end", values=(
-                rank, 
-                test["ticket_id"], 
-                test["name"], 
-                test["priority"], 
-                test["total_score"]
-            ))
+            priority = test["priority"]
+            
+            # Insert item with appropriate tag for coloring
+            item_id = self.tree.insert(
+                "", 
+                "end", 
+                values=(rank, test["ticket_id"], test["name"], priority, test["total_score"]),
+                tags=(priority,)
+            )
+        
     
     def get_selected_test(self):
         """

@@ -111,7 +111,7 @@ class ScoringSystem:
             return "High"
         elif score >= 60:
             return "Medium"
-        elif score >= 50:
+        elif score >= 40:
             return "Low"
         else:
             return "Lowest"

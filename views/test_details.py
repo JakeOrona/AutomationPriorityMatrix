@@ -142,12 +142,16 @@ class TestDetailsView:
         )
         
         # Set color based on priority
-        if self.test['priority'] == "High":
-            priority_value.configure(foreground="green")
-        elif self.test['priority'] == "Medium":
-            priority_value.configure(foreground="orange")
-        else:  # Low
+        if self.test['priority'] == "Highest":
             priority_value.configure(foreground="red")
+        elif self.test['priority'] == "High":
+            priority_value.configure(foreground="orange")
+        elif self.test['priority'] == "Medium":
+            priority_value.configure(foreground="yellow")
+        elif self.test['priority'] == "Low":
+            priority_value.configure(foreground="green")
+        else:  # Lowest
+            priority_value.configure(foreground="blue")
         
         priority_value.pack(side=tk.LEFT)
         row += 1

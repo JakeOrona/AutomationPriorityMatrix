@@ -209,7 +209,7 @@ class TestPrioritizationModel:
         highest_threshold = max_score * 0.90
         high_threshold = max_score * 0.80
         medium_threshold = max_score * 0.60
-        low_threshold = max_score * 0.50
+        low_threshold = max_score * 0.40
         lowest_threshold = max_score * 0.20
         
         # Group tests by priority
