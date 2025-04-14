@@ -92,8 +92,7 @@ class TestPrioritizationModel:
         raw_score, normalized_score = self.scoring.calculate_score(scores, yes_no_answers)
 
         # Get priority category
-        if priority_category is None:
-            priority_category = self.scoring.get_priority_category(normalized_score)
+        priority_category = self.scoring.get_priority_category(normalized_score)
         
         # Update test
         test_dict["name"] = name
@@ -192,9 +191,11 @@ class TestPrioritizationModel:
         """
         if not self.tests:
             return {
+                "highest": [],
                 "high": [],
                 "medium": [],
                 "low": [],
+                "lowest": [],
                 "high_threshold": 0,
                 "medium_threshold": 0
             }
@@ -204,20 +205,32 @@ class TestPrioritizationModel:
         
         # Calculate thresholds
         max_score = 100
-        high_threshold = max_score * 0.85
-        medium_threshold = max_score * 0.55
+        
+        highest_threshold = max_score * 0.90
+        high_threshold = max_score * 0.80
+        medium_threshold = max_score * 0.60
+        low_threshold = max_score * 0.50
+        lowest_threshold = max_score * 0.20
         
         # Group tests by priority
-        high_priority = [t for t in sorted_tests if t["total_score"] >= high_threshold]
+        highest_priority = [t for t in sorted_tests if t["total_score"] >= highest_threshold]
+        high_priority = [t for t in sorted_tests if high_threshold <= t["total_score"] < highest_threshold]
         medium_priority = [t for t in sorted_tests if medium_threshold <= t["total_score"] < high_threshold]
-        low_priority = [t for t in sorted_tests if t["total_score"] < medium_threshold]
+        low_priority = [t for t in sorted_tests if low_threshold <= t["total_score"] < medium_threshold]
+        lowest_priority = [t for t in sorted_tests if lowest_threshold <= t["total_score"] < low_threshold]
         
         return {
+            "highest": highest_priority,  
             "high": high_priority,
             "medium": medium_priority,
             "low": low_priority,
+            "lowest": lowest_priority,
+            "lowest_threshold": lowest_threshold,
+            "low_threshold": low_threshold,
             "high_threshold": high_threshold,
-            "medium_threshold": medium_threshold
+            "medium_threshold": medium_threshold,
+            "highest_threshold": highest_threshold,
+            "max_score": max_score
         }
     
     def import_tests(self, tests_data, replace=False):

@@ -105,9 +105,13 @@ class ScoringSystem:
             str: Priority category ('High', 'Medium', or 'Low')
         """
         # Define thresholds for categories
-        if score >= 85:
+        if score >= 90:
+            return "Highest"
+        elif score >= 80:
             return "High"
-        elif score >= 55:
+        elif score >= 60:
             return "Medium"
-        else:
+        elif score >= 50:
             return "Low"
+        else:
+            return "Lowest"
