@@ -77,9 +77,9 @@ class TestList:
         self.tree.heading("score", text="Priority Score")
         
         # Define column widths
-        self.tree.column("rank", width=30)
+        self.tree.column("rank", width=20)
         self.tree.column("ticket", width=60)
-        self.tree.column("section", width=100)
+        self.tree.column("section", width=80)
         self.tree.column("name", width=200)
         self.tree.column("priority", width=60)
         self.tree.column("score", width=60)
