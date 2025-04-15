@@ -26,7 +26,7 @@ class TextReportView(BaseReportView):
         priority_tiers = self.model.get_priority_tiers()
         
         # Generate report text
-        self.report_text = FileOperations.generate_report_text(self.model.tests, priority_tiers)
+        self.report_text = FileOperations.generate_report_text(self.model.tests, priority_tiers, self.model)
         
         # Create scrollable text widget
         text_frame = ttk.Frame(self.main_frame)
