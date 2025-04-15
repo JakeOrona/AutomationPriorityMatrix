@@ -53,37 +53,43 @@ class TestForm:
         
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
+
+        form_row = 0
         
         # Test Name
-        ttk.Label(scrollable_frame, text="Test Name:").grid(row=0, column=0, sticky=tk.W, pady=5)
+        ttk.Label(scrollable_frame, text="Test Name:").grid(row=form_row, column=0, sticky=tk.W, pady=5)
         ttk.Entry(scrollable_frame, textvariable=self.test_name_var, width=40).grid(
-            row=0, column=1, sticky=tk.W, pady=5
+            row=form_row, column=1, sticky=tk.W, pady=5
         )
+        form_row += 1
         
         # Test Description
-        ttk.Label(scrollable_frame, text="Description:").grid(row=1, column=0, sticky=tk.W, pady=5)
+        ttk.Label(scrollable_frame, text="Description:").grid(row=form_row, column=0, sticky=tk.W, pady=5)
         ttk.Entry(scrollable_frame, textvariable=self.test_desc_var, width=40).grid(
-            row=1, column=1, sticky=tk.W, pady=5
-        )
-
-        # Ticket ID
-        ttk.Label(scrollable_frame, text="Ticket ID:").grid(row=2, column=0, sticky=tk.W, pady=5)
-        ttk.Entry(scrollable_frame, textvariable=self.ticket_id_var, width=40).grid(
-            row=2, column=1, sticky=tk.W, pady=5
+            row=form_row, column=1, sticky=tk.W, pady=5
         )
         
+        form_row += 1
+
+        # Ticket ID
+        ttk.Label(scrollable_frame, text="Ticket ID:").grid(row=form_row, column=0, sticky=tk.W, pady=5)
+        ttk.Entry(scrollable_frame, textvariable=self.ticket_id_var, width=40).grid(
+            row=form_row, column=1, sticky=tk.W, pady=5
+        )
+        
+        form_row += 1
+
         # Scoring factors
-        row = 3
         
         for factor, details in self.model.factors.items():
             ttk.Label(scrollable_frame, text=f"{details['name']} (weight: {details['weight']}):").grid(
-                row=row, column=0, sticky=tk.W, pady=5
+                row=form_row, column=0, sticky=tk.W, pady=5
             )
             
             self.score_vars[factor] = tk.IntVar(value=3)  # Default to medium (3)
             
             score_frame = ttk.Frame(scrollable_frame)
-            score_frame.grid(row=row, column=1, sticky=tk.W, pady=5)
+            score_frame.grid(row=form_row, column=1, sticky=tk.W, pady=5)
             
             for score, label in self.model.score_options[factor].items():
                 rb = ttk.Radiobutton(
@@ -94,20 +100,20 @@ class TestForm:
                 )
                 rb.pack(anchor=tk.W)
             
-            row += 1
+            form_row += 1
         
         # Yes/No questions section
         if self.model.yes_no_questions:
             ttk.Label(scrollable_frame, text="Additional Questions:", font=("", 10, "bold")).grid(
-                row=row, column=0, columnspan=2, sticky=tk.W, pady=10
+                row=form_row, column=0, columnspan=2, sticky=tk.W, pady=10
             )
-            row += 1
+            form_row += 1
             
             for key, question_data in self.model.yes_no_questions.items():
                 self.yes_no_vars[key] = tk.BooleanVar(value=False)
                 
                 question_frame = ttk.Frame(scrollable_frame)
-                question_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=5)
+                question_frame.grid(row=form_row, column=0, columnspan=2, sticky=tk.W, pady=5)
                 
                 cb = ttk.Checkbutton(
                     question_frame,
@@ -123,11 +129,11 @@ class TestForm:
                     font=("", 8, "italic")
                 ).pack(side=tk.LEFT, padx=10)
                 
-                row += 1
+                form_row += 1
         
         # Buttons for form actions
         button_frame = ttk.Frame(scrollable_frame)
-        button_frame.grid(row=row, column=0, columnspan=2, pady=15)
+        button_frame.grid(row=form_row, column=0, columnspan=2, pady=15)
         
         ttk.Button(button_frame, text="Add Test", command=self.add_test).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Clear Form", command=self.clear_form).pack(side=tk.LEFT, padx=5)

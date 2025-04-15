@@ -65,7 +65,6 @@ class MainWindow:
         report_menu = tk.Menu(menubar, tearoff=0)
         report_menu.add_command(label="Priority Report", command=self.show_priority_report)
         report_menu.add_command(label="Graphical Report", command=self.show_graphical_report)
-        #report_menu.add_command(label="Prioritization Matrix", command=self.show_prioritization_matrix)
         menubar.add_cascade(label="Reports", menu=report_menu)
         
         # Help menu
@@ -183,177 +182,17 @@ class MainWindow:
         report_window = tk.Toplevel(self.root)
         ChartReportView(report_window, self.model)
     
-    def show_prioritization_matrix(self):
-        """Show the prioritization matrix"""
-        # First check if matplotlib is available
-        from utils.chart_utils import ChartUtils
-        if not ChartUtils.is_matplotlib_available():
-            messagebox.showinfo(
-                "Missing Dependency",
-                "Matplotlib is required for the prioritization matrix.\n\n" +
-                "Please install it using:\npip install matplotlib"
-            )
-            return
-            
-        # Check if we have test data
-        if not self.model.tests:
-            messagebox.showinfo("Matrix", "No tests available for prioritization matrix")
-            return
-            
-        # Create new window
-        matrix_window = tk.Toplevel(self.root)
-        matrix_window.title("Test Prioritization Matrix")
-        matrix_window.geometry("900x700")
-        
-        # Import necessary modules
-        from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-        import matplotlib.pyplot as plt
-        
-        # Create frame for matrix options
-        options_frame = ttk.Frame(matrix_window, padding=10)
-        options_frame.pack(fill=tk.X)
-        
-        # Variables for axis selection
-        x_axis_var = tk.StringVar(value="customer_impact")
-        y_axis_var = tk.StringVar(value="manual_effort")
-        
-        # Create option menus for selecting axes
-        ttk.Label(options_frame, text="X-Axis:").pack(side=tk.LEFT, padx=(0, 5))
-        
-        # Create dictionary of factor names for dropdown
-        factor_names = {factor: info["name"] for factor, info in self.model.factors.items()}
-        factor_keys = list(factor_names.keys())
-        
-        # Create X-axis dropdown
-        x_dropdown = ttk.Combobox(options_frame, textvariable=x_axis_var, state="readonly")
-        x_dropdown['values'] = [factor_names[k] for k in factor_keys]
-        x_dropdown.pack(side=tk.LEFT, padx=(0, 20))
-        
-        ttk.Label(options_frame, text="Y-Axis:").pack(side=tk.LEFT, padx=(0, 5))
-        
-        # Create Y-axis dropdown
-        y_dropdown = ttk.Combobox(options_frame, textvariable=y_axis_var, state="readonly")
-        y_dropdown['values'] = [factor_names[k] for k in factor_keys]
-        y_dropdown.pack(side=tk.LEFT)
-        
-        # Set initial values for dropdowns
-        x_dropdown.current(1)  # customer_impact
-        y_dropdown.current(2)  # manual_effort
-        
-        # Create frame for the plot
-        plot_frame = ttk.Frame(matrix_window)
-        plot_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
-        
-        # Function to map factor name back to key
-        def get_factor_key(name):
-            for key, value in factor_names.items():
-                if value == name:
-                    return key
-            return None
-        
-        # Function to update the matrix
-        def update_matrix(*args):
-            # Clear the plot frame
-            for widget in plot_frame.winfo_children():
-                widget.destroy()
-            
-            # Get selected factors
-            x_factor = get_factor_key(x_dropdown.get())
-            y_factor = get_factor_key(y_dropdown.get())
-            
-            if not x_factor or not y_factor:
-                return
-            
-            # Create the chart
-            fig, ax = ChartUtils.create_prioritization_matrix(
-                self.model.tests, 
-                x_factor, 
-                y_factor, 
-                self.model.factors
-            )
-            
-            # Embed the figure in the frame
-            canvas = FigureCanvasTkAgg(fig, master=plot_frame)
-            canvas.draw()
-            canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
-            
-            # Function to export the matrix
-            def export_matrix():
-                # Ask for save location
-                filename = filedialog.asksaveasfilename(
-                    parent=matrix_window,
-                    defaultextension=".png",
-                    filetypes=[
-                        ("PNG files", "*.png"),
-                        ("JPEG files", "*.jpg"),
-                        ("PDF files", "*.pdf"),
-                        ("SVG files", "*.svg"),
-                        ("All files", "*.*")
-                    ],
-                    title="Export Prioritization Matrix"
-                )
-                
-                if filename:
-                    # Get file extension to determine format
-                    extension = filename.split(".")[-1].lower()
-                    
-                    try:
-                        # Save the figure
-                        fig.savefig(
-                            filename, 
-                            dpi=300, 
-                            bbox_inches='tight', 
-                            format=extension if extension != "jpg" else "jpeg"
-                        )
-                        messagebox.showinfo(
-                            "Export Successful", 
-                            f"Matrix exported to {filename}",
-                            parent=matrix_window
-                        )
-                    except Exception as e:
-                        messagebox.showerror(
-                            "Export Error", 
-                            f"Error saving matrix: {str(e)}",
-                            parent=matrix_window
-                        )
-            
-            # Add export button
-            ttk.Button(plot_frame, text="Export Matrix", command=export_matrix).pack(pady=10)
-        
-        # Set up callback for dropdown changes
-        x_dropdown.bind("<<ComboboxSelected>>", update_matrix)
-        y_dropdown.bind("<<ComboboxSelected>>", update_matrix)
-        
-        # Initial update
-        update_matrix()
-        
-        # Add explanation text
-        explanation_frame = ttk.LabelFrame(matrix_window, text="How to Read the Matrix", padding=10)
-        explanation_frame.pack(fill=tk.X, padx=10, pady=5)
-        
-        explanation_text = """
-        This matrix plots tests based on the two selected factors. 
-        
-        • Bubble size represents the overall priority score
-        • Colors indicate priority levels (green = high, orange = medium, red = low)
-        • Tests in the upper-right quadrant (High Value, High Effort) are strategic priorities
-        • Tests in the lower-right quadrant (High Value, Low Effort) are quick wins
-        • Tests in the upper-left quadrant (Low Value, High Effort) should be reconsidered
-        • Tests in the lower-left quadrant (Low Value, Low Effort) are low priority
-        
-        Change the axes to view different factor combinations.
-        """
-        ttk.Label(explanation_frame, text=explanation_text, justify=tk.LEFT).pack(anchor=tk.W)
-        
-        # Add close button
-        ttk.Button(matrix_window, text="Close", command=matrix_window.destroy).pack(pady=10)
-    
     def show_about(self):
         """Show the about dialog"""
         about_text = "Test Automation Prioritization Tool\n\n"
         about_text += "This application helps QA teams decide which manual tests to automate first.\n\n"
         about_text += "Using a weighted scoring system, it calculates which tests will provide\n"
-        about_text += "the highest return on investment when automated."
+        about_text += "the highest return on investment when automated.\n\n"
+        about_text += "Developed by Jake Orona\n"
+        about_text += "Version: 1.0.0-beta\n"
+        about_text += "License: MIT\n\n"
+        about_text += "For more information, visit the GitHub repository:\n"
+        about_text += "https://github.com/JakeOrona/AutomationPriorityMatrix\n"
         
         messagebox.showinfo("About", about_text)
     
