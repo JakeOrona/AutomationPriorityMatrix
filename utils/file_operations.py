@@ -53,11 +53,16 @@ class FileOperations:
             # Prepare data for export
             data = []
             for test in sorted_tests:
+                # Ensure description is never None or NaN
+                description = test.get("description", "")
+                if description is None or description == "nan" or (hasattr(description, "lower") and description.lower() == "nan"):
+                    description = ""
+                    
                 row = {
                     "Test ID": test["id"],
                     "Ticket ID": test.get("ticket_id", "N/A"),
                     "Test Name": test["name"],
-                    "Description": test["description"],
+                    "Description": description,
                     "Raw Score": test.get("raw_score", "N/A"),
                     "Total Score (100-point)": test["total_score"]
                 }
@@ -70,10 +75,7 @@ class FileOperations:
                 # Add yes/no answers if available
                 if has_yes_no and 'yes_no_answers' in test:
                     for question_key, answer in test['yes_no_answers'].items():
-                        # Get the appropriate column header
                         question_text = f"Question: {question_key}"
-                        
-                        # Add the answer
                         row[question_text] = "Yes" if answer else "No"
                 
                 data.append(row)
@@ -172,7 +174,10 @@ class FileOperations:
         for i, test in enumerate(highest_priority):
             report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"   Score: {test['total_score']:.1f}\n"
-            report_text += f"   Description: {test['description']}\n"
+
+            # Add description if available
+            if 'description' in test:
+                report_text += f"   Description: {test['description']}\n"
             
             # Add score details with descriptions
             if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
@@ -200,7 +205,10 @@ class FileOperations:
         for i, test in enumerate(high_priority):
             report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"   Score: {test['total_score']:.1f}\n"
-            report_text += f"   Description: {test['description']}\n"
+
+            # Add description if available
+            if 'description' in test:
+                report_text += f"   Description: {test['description']}\n"
             
             # Add score details with descriptions
             if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
@@ -228,6 +236,10 @@ class FileOperations:
         for i, test in enumerate(medium_priority):
             report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"   Score: {test['total_score']:.1f}\n"
+
+            # Add description if available
+            if 'description' in test:
+                report_text += f"   Description: {test['description']}\n"
             
             # Add score details with descriptions
             if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
@@ -256,6 +268,10 @@ class FileOperations:
             report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"   Score: {test['total_score']:.1f}\n"
 
+            # Add description if available
+            if 'description' in test:
+                report_text += f"   Description: {test['description']}\n"
+
             # Add score details with descriptions
             if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
                 report_text += f"   Factor Scores:\n"
@@ -270,7 +286,7 @@ class FileOperations:
                     report_text += f"   * {key}: {answer}\n"
                     
             report_text += "\n"
-            
+
         report_text += "\n"
 
         # Lowest priority section
@@ -281,7 +297,10 @@ class FileOperations:
         for i, test in enumerate(lowest_priority):
             report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"   Score: {test['total_score']:.1f}\n"
-            report_text += f"   Description: {test['description']}\n"
+            
+            # Add description if available
+            if 'description' in test:
+                report_text += f"   Description: {test['description']}\n"
             
             # Add score details with descriptions
             if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):

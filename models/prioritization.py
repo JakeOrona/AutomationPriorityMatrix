@@ -277,12 +277,17 @@ class TestPrioritizationModel:
             
             # Create test object
             test_id = data.get("Test ID", int(self.current_id))
+
+            # Handle potentially NaN description values
+            description = data.get("Description", "")
+            if description == "nan" or description is None or (hasattr(description, "lower") and description.lower() == "nan"):
+                description = ""
             
             test = {
                 "id": test_id,
                 "name": data.get("Test Name", ""),
                 "ticket_id": data.get("Ticket ID", ""),
-                "description": data.get("Description", ""),
+                "description": description,
                 "scores": scores,
                 "raw_score": raw_score,
                 "total_score": round(normalized_score, 1),  # Round to 1 decimal place
