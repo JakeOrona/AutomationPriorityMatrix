@@ -278,6 +278,14 @@ class TestForm:
         sections = list(self.model.sections)
         sections.sort()
         self.section_combo['values'] = sections
+        # Update section combobox values in case new section was added
+        self.update_section_combobox()
+
+    def update_section_combobox(self):
+        """Update the section combobox with current sections from the model"""
+        sections = list(self.model.sections)
+        sections.sort()
+        self.section_combo['values'] = sections
     
     def clear_form(self):
         """Clear the input form"""

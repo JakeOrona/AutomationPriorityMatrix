@@ -99,6 +99,7 @@ class MainWindow:
     def on_test_updated(self):
         """Callback when a test is added, updated, or deleted"""
         self.test_list.update_list()
+        self.test_form.update_section_combobox()
     
     def show_test_details(self, test):
         """Show test details in a new window"""

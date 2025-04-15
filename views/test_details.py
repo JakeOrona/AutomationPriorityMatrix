@@ -103,15 +103,15 @@ class TestDetailsView:
             
             # Section dropdown
             ttk.Label(self.scrollable_frame, text="Section:").grid(row=row, column=0, sticky=tk.W, pady=5)
-            
+
             # Create a frame for section selection
             section_frame = ttk.Frame(self.scrollable_frame)
             section_frame.grid(row=row, column=1, sticky=tk.W, pady=5)
-            
-            # Get available sections from the model
+
+            # Get available sections from the model - get the LATEST sections
             sections = list(self.model.sections)
             sections.sort()  # Sort alphabetically
-            
+
             # Create the combobox with existing sections
             self.section_combo = ttk.Combobox(section_frame, textvariable=self.edit_section_var, width=25)
             self.section_combo['values'] = sections
@@ -389,9 +389,9 @@ class TestDetailsView:
         updated_test = self.model.update_test(
             self.test["id"],
             self.edit_name_var.get(),
+            self.edit_section_var.get(),
             self.edit_desc_var.get(),
             self.edit_ticket_id_var.get(),
-            self.edit_section_var.get(),  # Pass section to update_test
             scores,
             yes_no_answers
         )

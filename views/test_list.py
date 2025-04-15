@@ -112,6 +112,10 @@ class TestList:
         # Clear existing items
         for item in self.tree.get_children():
             self.tree.delete(item)
+
+        # Update the sections list in the combobox
+        sections = ["All Sections"] + sorted(list(self.model.sections))
+        self.section_combo['values'] = sections
         
         # Get section filter
         section_filter = self.section_filter_var.get()
@@ -153,7 +157,7 @@ class TestList:
             return None
         
         # Get test name from the selected item
-        test_name = self.tree.item(selected_item[0], "values")[2]
+        test_name = self.tree.item(selected_item[0], "values")[3]
         
         # Find the test by name
         test_id = self.model.find_test_id_by_name(test_name)
