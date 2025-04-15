@@ -62,7 +62,7 @@ class ChartUtils:
             ax.set_title('Test Priority Distribution')
         else:
             ax.text(0.5, 0.5, "No data available", horizontalalignment='center',
-                  verticalalignment='center', transform=ax.transAxes)
+                    verticalalignment='center', transform=ax.transAxes)
         
         return fig, ax
     
@@ -182,7 +182,7 @@ class ChartUtils:
             fig.tight_layout()  # Adjust layout for rotated labels
         else:
             ax.text(0.5, 0.5, "No data available", horizontalalignment='center',
-                  verticalalignment='center', transform=ax.transAxes)
+                    verticalalignment='center', transform=ax.transAxes)
         
         return fig, ax
     
@@ -252,12 +252,12 @@ class ChartUtils:
             for i, bar in enumerate(bars):
                 width = bar.get_width()
                 ax.text(width + 1, bar.get_y() + bar.get_height()/2.,
-                       f'{width:.1f}', va='center')
+                        f'{width:.1f}', va='center')
             
             fig.tight_layout()  # Adjust layout for long test names
         else:
             ax.text(0.5, 0.5, "No data available", horizontalalignment='center',
-                  verticalalignment='center', transform=ax.transAxes)
+                    verticalalignment='center', transform=ax.transAxes)
         
         return fig, ax
     

@@ -75,7 +75,7 @@ class TestList:
         button_frame.pack(fill=tk.X, pady=10)
         
         ttk.Button(button_frame, text="View Details", command=self.view_details).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="Edit Test", command=self.edit_test).pack(side=tk.LEFT, padx=5)
+        # ttk.Button(button_frame, text="Edit Test", command=self.edit_test).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Delete Test", command=self.delete_test).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Delete All Tests", command=self.delete_all_tests).pack(side=tk.LEFT, padx=5)
         

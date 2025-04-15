@@ -187,7 +187,7 @@ class TestPrioritizationModel:
         
         Returns:
             dict: Dictionary with 'high', 'medium', and 'low' priority test lists
-                  and threshold values
+                    and threshold values
         """
         if not self.tests:
             return {
