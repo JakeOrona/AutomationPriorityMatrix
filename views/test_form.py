@@ -58,7 +58,7 @@ class TestForm:
         form_row = 0
         
         # Test basic info frame
-        basic_info_frame = ttk.LabelFrame(scrollable_frame)
+        basic_info_frame = ttk.LabelFrame(scrollable_frame, text="Test Information")
         basic_info_frame.grid(row=form_row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=(0,5), padx=5)
         
         info_row = 0
