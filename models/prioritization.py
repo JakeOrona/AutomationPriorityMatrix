@@ -35,15 +35,15 @@ class TestPrioritizationModel:
         """Get yes/no questions from the scoring system"""
         return self.scoring.yes_no_questions
     
-    def add_test(self, name, description, ticket_id, section, scores, yes_no_answers=None, priority_category=None):
+    def add_test(self, name, section, description, ticket_id, scores, yes_no_answers=None, priority_category=None):
         """
         Add a new test with calculated priority scores
         
         Args:
             name (str): Test name
             description (str): Test description
-            ticket_id (str): Ticket ID associated with the test
             section (str): Section or category the test belongs to
+            ticket_id (str): Ticket ID associated with the test
             scores (dict): Dictionary of scores for each factor
             yes_no_answers (dict, optional): Dictionary of yes/no answers
             priority_category (str, optional): Predefined priority category
@@ -52,7 +52,7 @@ class TestPrioritizationModel:
             Test: The newly created test object
         """
         # Create a new Test instance
-        test = TestModel(self.current_id, name, description, ticket_id, section, scores, yes_no_answers)
+        test = TestModel(self.current_id, name, section, description, ticket_id, scores, yes_no_answers)
         
         # Check if test can be automated
         can_be_automated = True
@@ -84,16 +84,16 @@ class TestPrioritizationModel:
         
         return test_dict
     
-    def update_test(self, test_id, name, description, ticket_id, section, scores, yes_no_answers=None, priority_category=None):
+    def update_test(self, test_id, name, section, description, ticket_id, scores, yes_no_answers=None, priority_category=None):
         """
         Update an existing test
         
         Args:
             test_id (str): ID of the test to update
             name (str): Updated test name
+            section (str): Updated section
             description (str): Updated test description
             ticket_id (str): Updated ticket ID
-            section (str): Updated section
             scores (dict): Updated scores for each factor
             yes_no_answers (dict, optional): Dictionary of yes/no answers
             priority_category (str, optional): Predefined priority category
@@ -395,9 +395,9 @@ class TestPrioritizationModel:
             test = {
                 "id": test_id,
                 "name": data.get("Test Name", ""),
+                "section": section,
                 "ticket_id": data.get("Ticket ID", ""),
                 "description": description,
-                "section": section,
                 "scores": scores,
                 "raw_score": raw_score,
                 "total_score": round(normalized_score, 1),  # Round to 1 decimal place

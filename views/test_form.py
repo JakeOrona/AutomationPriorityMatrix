@@ -256,9 +256,9 @@ class TestForm:
         # Add test using the model
         test = self.model.add_test(
             self.test_name_var.get(),
+            self.section_var.get(),
             self.test_desc_var.get(),
             self.ticket_id_var.get(),
-            self.section_var.get(), 
             scores,
             yes_no_answers,
             self.priority_var.get()

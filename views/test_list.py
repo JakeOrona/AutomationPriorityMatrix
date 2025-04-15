@@ -124,8 +124,10 @@ class TestList:
         
         for i, test in enumerate(filtered_tests):
             rank = i + 1
-            priority = test["priority"]
+            ticket_id = test.get("ticket_id")
             section = test.get("section", "")
+            test_name = test.get("name")
+            priority = test.get("priority")
             
             # For "Can't Automate" tests, show 0 score
             score_display = "0" if priority == "Can't Automate" else test["total_score"]
@@ -134,7 +136,7 @@ class TestList:
             item_id = self.tree.insert(
                 "", 
                 "end", 
-                values=(rank, test["ticket_id"], section, test["name"], priority, score_display),
+                values=(rank, ticket_id, section, test_name, priority, score_display),
                 tags=(priority,)
             )
     
