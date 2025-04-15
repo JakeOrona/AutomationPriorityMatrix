@@ -8,17 +8,17 @@ This application helps QA teams decide which manual tests to automate first by c
 
 ## Structure
 
-1. **models.py**: Contains all the business logic and data models
+1. **models/**: Contains all the business logic and data models
    - Manages tests and their data
    - Implements scoring algorithms
    - Provides priority analysis
 
-2. **file_util.py**: Handles all file-related operations
+2. **utils/**: Handles all utility operations
    - CSV import/export
    - Report generation
-   - Documentation generation
+   - Chart generation
 
-3. **gui.py**: Contains the GUI components
+3. **views/**: Contains the GUI components
    - User interface layout
    - Event handling
    - User interaction
@@ -60,14 +60,65 @@ This application helps QA teams decide which manual tests to automate first by c
 
 ## Installation
 
-1. Ensure you have Python installed
-2. Install required dependencies:
-   ```pip install matplotlib pandas```
-3. Clone or download this repository
+1. Download and install Python 3.6+ from https://www.python.org/downloads/
+   - Windows users: Make sure to check "Add Python to PATH" during installation
+   - Mac users: Use `python3` commands instead of `python`
+   - Linux users: Install tkinter if not included (`sudo apt-get install python3-tk` for Ubuntu)
+
+2. Open a command prompt/terminal and install required dependencies:
+   ```bash
+   pip install matplotlib pandas
+   ```
+
+3. Download this repository:
+   - Click the green "Code" button above and select "Download ZIP"
+   - Extract the ZIP file to a folder of your choice
+   - Or use git: `git clone [repository-url]`
+
+4. Navigate to the application folder in your command prompt/terminal:
+   ```bash
+   cd path/to/test-prioritization-app
+   ```
+
+5. Run the application:
+   - Windows: 
+   ```bash
+   python main.py
+   ```
+   - Mac/Linux: 
+   ```bash
+   python3 main.py
+   ```
 
 ## Usage
 
-Run the application with:
-```python main.py```
-or
-```python3 main.py```
+1. **Adding a test**:
+- Fill in the test details on the left panel
+- Set the priority factors using the radio buttons
+- Click "Add Test" button
+
+2. **Viewing tests**:
+- All tests appear in the list on the right panel
+- Double-click a test to view details
+- Use the section filter to show tests from a specific section
+
+3. **Generating reports**:
+- Access reports from the "Reports" menu
+- Choose between text-based priority report and graphical reports
+- Export reports to files for sharing
+
+4. **Importing/Exporting tests**:
+- Use the "File" menu to import or export tests as CSV
+- Useful for backing up data or transferring tests between installations
+
+## Troubleshooting
+
+- **"No module named 'matplotlib'"**: Run `pip install matplotlib`
+- **"No module named 'pandas'"**: Run `pip install pandas`
+- **UI elements not displaying correctly**: Make sure you have tkinter installed properly
+- **Charts not showing**: Confirm matplotlib is installed and working
+
+## License
+
+MIT License
+
