@@ -41,11 +41,11 @@ class MainWindow:
         self.main_frame.pack(fill=tk.BOTH, expand=True)
         
         # Left panel (for input form)
-        self.input_frame = ttk.LabelFrame(self.main_frame, text="Test Details", padding="10")
+        self.input_frame = ttk.LabelFrame(self.main_frame, text="Test Details", padding="5")
         self.input_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
         
         # Right panel (for test list)
-        self.list_frame = ttk.LabelFrame(self.main_frame, text="Prioritized Tests", padding="10")
+        self.list_frame = ttk.LabelFrame(self.main_frame, text="Prioritized Tests", padding="5")
         self.list_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=(5, 0))
     
     def create_menu(self):

@@ -61,8 +61,7 @@ class TestList:
         self.section_combo.bind('<<ComboboxSelected>>', lambda e: self.update_list())
         
         # Create treeview for test list with scrollbar
-        columns = ("rank", "ticket", "name", "section", "priority", "score")
-        colored_columns = ("priority", "score")
+        columns = ("rank", "ticket", "section", "name", "priority", "score")
         
         self.tree_frame = ttk.Frame(self.parent)
         self.tree_frame.pack(fill=tk.BOTH, expand=True)
@@ -72,16 +71,16 @@ class TestList:
         # Define column headings
         self.tree.heading("rank", text="Rank")
         self.tree.heading("ticket", text="Ticket ID")
-        self.tree.heading("name", text="Test Name")
         self.tree.heading("section", text="Section")
+        self.tree.heading("name", text="Test Name")
         self.tree.heading("priority", text="Priority")
         self.tree.heading("score", text="Priority Score")
         
         # Define column widths
         self.tree.column("rank", width=30)
         self.tree.column("ticket", width=60)
-        self.tree.column("name", width=200)
         self.tree.column("section", width=100)
+        self.tree.column("name", width=200)
         self.tree.column("priority", width=60)
         self.tree.column("score", width=60)
         
@@ -135,7 +134,7 @@ class TestList:
             item_id = self.tree.insert(
                 "", 
                 "end", 
-                values=(rank, test["ticket_id"], test["name"], section, priority, score_display),
+                values=(rank, test["ticket_id"], section, test["name"], priority, score_display),
                 tags=(priority,)
             )
     
