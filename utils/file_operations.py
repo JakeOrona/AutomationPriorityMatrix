@@ -35,7 +35,7 @@ class FileOperations:
             sorted_tests = sorted(tests, key=lambda x: x["total_score"], reverse=True)
             
             # Create field names (column headers)
-            field_names = ["Test ID", "Ticket ID", "Test Name", "Description", "Raw Score", "Total Score (100-point)"]
+            field_names = ["Test ID", "Ticket ID", "Section", "Test Name", "Description", "Raw Score", "Total Score (100-point)"]
             
             # Add factor score headers
             for factor_key, factor_info in factors.items():
@@ -61,6 +61,7 @@ class FileOperations:
                 row = {
                     "Test ID": test["id"],
                     "Ticket ID": test.get("ticket_id", "N/A"),
+                    "Section": test.get("section", ""),
                     "Test Name": test["name"],
                     "Description": description,
                     "Raw Score": test.get("raw_score", "N/A"),
@@ -149,6 +150,18 @@ class FileOperations:
         header = f"TEST AUTOMATION PRIORITY REPORT\n"
         header += f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
         header += f"Total Tests: {len(tests)}\n"
+        
+        # Group tests by section
+        sections = {}
+        for test in tests:
+            section = test.get("section", "")
+            if section not in sections:
+                sections[section] = []
+            sections[section].append(test)
+        
+        if sections:
+            header += f"Sections: {len(sections)}\n"
+        
         header += "=" * 70 + "\n\n"
         
         report_text = header
@@ -175,6 +188,10 @@ class FileOperations:
         for i, test in enumerate(highest_priority):
             report_text += f"| {i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"|    Score: {test['total_score']:.1f}\n"
+
+            # Add section if available
+            if test.get("section"):
+                report_text += f"|    Section: {test['section']}\n"
 
             # Add description if available
             if 'description' in test:
@@ -209,6 +226,10 @@ class FileOperations:
             report_text += f"| {i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"|    Score: {test['total_score']:.1f}\n"
 
+            # Add section if available
+            if test.get("section"):
+                report_text += f"|    Section: {test['section']}\n"
+
             # Add description if available
             if 'description' in test:
                 report_text += f"|    Description: {test['description']}\n"
@@ -241,6 +262,10 @@ class FileOperations:
         for i, test in enumerate(medium_priority):
             report_text += f"| {i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"|    Score: {test['total_score']:.1f}\n"
+
+            # Add section if available
+            if test.get("section"):
+                report_text += f"|    Section: {test['section']}\n"
 
             # Add description if available
             if 'description' in test:
@@ -275,6 +300,10 @@ class FileOperations:
             report_text += f"| {i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"|    Score: {test['total_score']:.1f}\n"
 
+            # Add section if available
+            if test.get("section"):
+                report_text += f"|    Section: {test['section']}\n"
+
             # Add description if available
             if 'description' in test:
                 report_text += f"|    Description: {test['description']}\n"
@@ -307,6 +336,10 @@ class FileOperations:
             report_text += f"| {i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"|    Score: {test['total_score']:.1f}\n"
             
+            # Add section if available
+            if test.get("section"):
+                report_text += f"|    Section: {test['section']}\n"
+            
             # Add description if available
             if 'description' in test:
                 report_text += f"|    Description: {test['description']}\n"
@@ -331,7 +364,7 @@ class FileOperations:
         
         report_text += "\n"
         
-        # Can't Automate section (new)
+        # Can't Automate section
         if cant_automate:
             report_text += f"TESTS THAT CAN'T BE AUTOMATED:\n"
             report_text += f"These tests have been identified as not possible to automate\n"
@@ -339,6 +372,10 @@ class FileOperations:
             
             for i, test in enumerate(cant_automate):
                 report_text += f"| {i+1}. {test['name']} (ID: {test['id']})\n"
+                
+                # Add section if available
+                if test.get("section"):
+                    report_text += f"|    Section: {test['section']}\n"
                 
                 # Add description if available
                 if 'description' in test:
@@ -366,6 +403,34 @@ class FileOperations:
                         report_text += f"|    * {key}: {answer}\n"
                 
                 report_text += "|\n"
+            
+            report_text += "-" * 70 + "\n"
+            
+        # Add section breakdown report
+        if len(sections) > 1:  # Only add section breakdown if there's more than one section
+            report_text += "\n"
+            report_text += "SECTION BREAKDOWN:\n"
+            report_text += "-" * 70 + "\n"
+            
+            for section_name, section_tests in sorted(sections.items()):
+                # Skip empty section name
+                if not section_name:
+                    continue
+                    
+                # Count tests by priority in this section
+                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
+                for test in section_tests:
+                    priority = test.get("priority", "")
+                    if priority in priority_counts:
+                        priority_counts[priority] += 1
+                
+                report_text += f"Section: {section_name}\n"
+                report_text += f"Total Tests: {len(section_tests)}\n"
+                report_text += "Priority Distribution:\n"
+                for priority, count in priority_counts.items():
+                    if count > 0:
+                        report_text += f"  - {priority}: {count} tests\n"
+                report_text += "\n"
             
             report_text += "-" * 70 + "\n"
         
@@ -408,11 +473,23 @@ class FileOperations:
         guide += "3. The raw score is converted to a 100-point scale\n\n"
         guide += "Formula: Final Score = (Raw Score / Max Possible Raw Score) × 100\n\n"
         
-        max_possible_raw = sum(5 * details["weight"] for factor, details in factors.items())
+        # Skip the "can_be_automated" factor (which has weight 0) when calculating max possible score
+        max_possible_raw = sum(5 * details["weight"] for factor, details in factors.items() 
+                            if factor != "can_be_automated")
         guide += f"Maximum possible raw score: {max_possible_raw}\n"
         guide += "Maximum possible final score: 100\n"
-        guide += f"Minimum possible raw score: {sum(1 * details['weight'] for factor, details in factors.items())}\n"
+        guide += f"Minimum possible raw score: {sum(1 * details['weight'] for factor, details in factors.items() if factor != 'can_be_automated')}\n"
         guide += "Minimum possible final score: 20\n\n"
+        
+        # Special note for "Can it be automated?" factor
+        if "can_be_automated" in factors:
+            guide += "Special Case - Tests that cannot be automated:\n"
+            guide += "-" * 50 + "\n"
+            guide += "If a test is marked as 'Cannot be automated' (selecting 'No' for the\n"
+            guide += "'Can it be automated?' factor), it will automatically receive:\n"
+            guide += "  - A score of 0\n"
+            guide += "  - Priority category of 'Can't Automate'\n"
+            guide += "These tests are excluded from normal prioritization and shown separately.\n\n"
         
         return guide
     

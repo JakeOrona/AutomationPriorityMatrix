@@ -12,7 +12,7 @@ def main():
     # Create the root window
     root = tk.Tk()
     root.title("Test Automation Prioritization Tool")
-    root.geometry("1525x730")
+    root.geometry("1535x885")
     
     # Create the model
     model = TestPrioritizationModel()

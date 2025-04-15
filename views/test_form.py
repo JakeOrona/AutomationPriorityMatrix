@@ -2,7 +2,7 @@
 test_form.py - Component for the test input form
 """
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 
 class TestForm:
     """
@@ -26,6 +26,7 @@ class TestForm:
         self.test_name_var = tk.StringVar()
         self.test_desc_var = tk.StringVar()
         self.ticket_id_var = tk.StringVar(value="AUTO-")
+        self.section_var = tk.StringVar()
         self.priority_var = tk.StringVar()
         self.score_vars = {}
         self.yes_no_vars = {}
@@ -56,29 +57,59 @@ class TestForm:
 
         form_row = 0
         
+        # Test basic info frame
+        basic_info_frame = ttk.LabelFrame(scrollable_frame, text="Test Information")
+        basic_info_frame.grid(row=form_row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=10, padx=5)
+        
+        info_row = 0
+        
         # Test Name
-        ttk.Label(scrollable_frame, text="Test Name:").grid(row=form_row, column=0, sticky=tk.W, pady=5)
-        ttk.Entry(scrollable_frame, textvariable=self.test_name_var, width=40).grid(
-            row=form_row, column=1, sticky=tk.W, pady=5
+        ttk.Label(basic_info_frame, text="Test Name:").grid(row=info_row, column=0, sticky=tk.W, pady=5, padx=5)
+        ttk.Entry(basic_info_frame, textvariable=self.test_name_var, width=40).grid(
+            row=info_row, column=1, sticky=tk.W, pady=5, padx=5
         )
-        form_row += 1
+        info_row += 1
         
         # Test Description
-        ttk.Label(scrollable_frame, text="Description:").grid(row=form_row, column=0, sticky=tk.W, pady=5)
-        ttk.Entry(scrollable_frame, textvariable=self.test_desc_var, width=40).grid(
-            row=form_row, column=1, sticky=tk.W, pady=5
+        ttk.Label(basic_info_frame, text="Description:").grid(row=info_row, column=0, sticky=tk.W, pady=5, padx=5)
+        ttk.Entry(basic_info_frame, textvariable=self.test_desc_var, width=40).grid(
+            row=info_row, column=1, sticky=tk.W, pady=5, padx=5
         )
-        
-        form_row += 1
+        info_row += 1
 
         # Ticket ID
-        ttk.Label(scrollable_frame, text="Ticket ID:").grid(row=form_row, column=0, sticky=tk.W, pady=5)
-        ttk.Entry(scrollable_frame, textvariable=self.ticket_id_var, width=40).grid(
-            row=form_row, column=1, sticky=tk.W, pady=5
+        ttk.Label(basic_info_frame, text="Ticket ID:").grid(row=info_row, column=0, sticky=tk.W, pady=5, padx=5)
+        ttk.Entry(basic_info_frame, textvariable=self.ticket_id_var, width=40).grid(
+            row=info_row, column=1, sticky=tk.W, pady=5, padx=5
         )
+        info_row += 1
+        
+        # Section dropdown
+        ttk.Label(basic_info_frame, text="Section:").grid(row=info_row, column=0, sticky=tk.W, pady=5, padx=5)
+        
+        # Create a combobox for section selection
+        section_frame = ttk.Frame(basic_info_frame)
+        section_frame.grid(row=info_row, column=1, sticky=tk.W, pady=5, padx=5)
+        
+        # Get available sections from the model
+        sections = list(self.model.sections)
+        sections.sort()  # Sort alphabetically
+        
+        # Create the combobox with existing sections
+        self.section_combo = ttk.Combobox(section_frame, textvariable=self.section_var, width=25)
+        self.section_combo['values'] = sections
+        self.section_combo.pack(side=tk.LEFT, padx=(0, 5))
+        
+        # Option to add a new section
+        ttk.Button(
+            section_frame, 
+            text="Add New", 
+            command=self.add_new_section,
+            width=10
+        ).pack(side=tk.LEFT)
         
         form_row += 1
-
+        
         # Scoring factors - First add "Can it be automated?" with a note about its importance
         if "can_be_automated" in self.model.factors:
             automation_frame = ttk.LabelFrame(scrollable_frame, text="Automation Possibility Assessment")
@@ -87,7 +118,8 @@ class TestForm:
             # Add an info label explaining the importance of this factor
             ttk.Label(
                 automation_frame, 
-                text="If 'No' is selected, the test will be categorized as 'Can't Automate'\n" +
+                text="This factor determines if the test can be automated at all.\n" +
+                    "If 'No' is selected, the test will be categorized as 'Can't Automate'\n" +
                     "and will receive a priority score of 0.",
                 font=("", 9, "italic")
             ).pack(pady=5, padx=5, anchor=tk.W)
@@ -190,6 +222,22 @@ class TestForm:
         ttk.Button(button_frame, text="Add Test", command=self.add_test).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Clear Form", command=self.clear_form).pack(side=tk.LEFT, padx=5)
     
+    def add_new_section(self):
+        """Open a dialog to add a new section"""
+        new_section = simpledialog.askstring("New Section", "Enter a new section name:", parent=self.parent)
+        
+        if new_section:
+            # Add to model's sections
+            self.model.sections.add(new_section)
+            
+            # Update combobox values
+            sections = list(self.model.sections)
+            sections.sort()
+            self.section_combo['values'] = sections
+            
+            # Set the combobox to the new value
+            self.section_var.set(new_section)
+    
     def add_test(self):
         """Add a test based on form input"""
         # Validate input
@@ -208,6 +256,7 @@ class TestForm:
             self.test_name_var.get(),
             self.test_desc_var.get(),
             self.ticket_id_var.get(),
+            self.section_var.get(),  # Pass the section 
             scores,
             yes_no_answers,
             self.priority_var.get()
@@ -222,12 +271,18 @@ class TestForm:
         
         # Update ID for next test
         self.test_id_var.set(self.model.current_id)
+        
+        # Update section combobox values in case new section was added
+        sections = list(self.model.sections)
+        sections.sort()
+        self.section_combo['values'] = sections
     
     def clear_form(self):
         """Clear the input form"""
         self.test_name_var.set("")
         self.test_desc_var.set("")
         self.ticket_id_var.set("AUTO-")
+        self.section_var.set("")  # Clear section
         
         # Reset automation possibility to Yes (5)
         if "can_be_automated" in self.score_vars:
@@ -253,7 +308,13 @@ class TestForm:
         self.test_id_var.set(test["id"])
         self.test_desc_var.set(test["description"])
         self.ticket_id_var.set(test["ticket_id"])
+        self.section_var.set(test.get("section", ""))  # Set section
         self.priority_var.set(test["priority"])
+        
+        # Update section combobox values in case sections were added
+        sections = list(self.model.sections)
+        sections.sort()
+        self.section_combo['values'] = sections
         
         for factor, score in test["scores"].items():
             if factor in self.score_vars:

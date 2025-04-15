@@ -51,7 +51,7 @@ class ChartUtils:
         # Create pie chart
         labels = list(priority_counts.keys())
         sizes = list(priority_counts.values())
-        colors = ['red', 'orange', 'yellow', 'green', 'lightblue', 'gray']
+        colors = ['red', 'orange', 'yellow', 'blue', 'lightblue', 'gray']
         explode = (0.1, 0, 0, 0, 0, 0)  # Explode the 1st slice (Highest priority)
         
         # Plot if there's data
@@ -120,7 +120,7 @@ class ChartUtils:
                         label=f'High Threshold ({high_threshold:.1f})')
             ax.axvline(x=medium_threshold, color='yellow', linestyle='--', 
                         label=f'Medium Threshold ({medium_threshold:.1f})')
-            ax.axvline(x=low_threshold, color='green', linestyle='--', 
+            ax.axvline(x=low_threshold, color='blue', linestyle='--', 
                         label=f'Low Threshold ({low_threshold:.1f})')
             ax.axvline(x=lowest_threshold, color='lightblue', linestyle='--',
                         label=f'Lowest Threshold ({lowest_threshold:.1f})')
@@ -263,7 +263,7 @@ class ChartUtils:
                 elif test["priority"] == "Medium":
                     colors.append("yellow")
                 elif test["priority"] == "Low":
-                    colors.append("green")
+                    colors.append("blue")
                 else:  # Lowest
                     colors.append("lightblue")
             

@@ -6,12 +6,13 @@ class TestModel:
     """
     Represents a single test with its properties and scores
     """
-    def __init__(self, id, name, description, ticket_id, scores, yes_no_answers=None):
+    def __init__(self, id, section, name, description, ticket_id, scores, yes_no_answers=None):
         """
         Initialize a test instance
         
         Args:
             id (str): The test identifier
+            section (str): Section or category that the test belongs to
             name (str): Test name
             description (str): Test description
             ticket_id (str): Ticket ID associated with the test
@@ -19,6 +20,7 @@ class TestModel:
             yes_no_answers (dict, optional): Dictionary of yes/no answers
         """
         self.id = id
+        self.section = section
         self.name = name
         self.description = description
         self.ticket_id = ticket_id
@@ -37,6 +39,7 @@ class TestModel:
         """
         return {
             "id": self.id,
+            "section": self.section,
             "name": self.name,
             "description": self.description,
             "ticket_id": self.ticket_id,
@@ -60,8 +63,9 @@ class TestModel:
         """
         test = cls(
             id=data["id"],
+            section=data.get("section", ""),
             name=data["name"],
-            description=data["description"],
+            description=data.get("description", ""),
             ticket_id=data["ticket_id"],
             scores=data["scores"],
             yes_no_answers=data.get("yes_no_answers", {})

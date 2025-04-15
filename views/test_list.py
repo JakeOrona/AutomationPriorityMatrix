@@ -30,18 +30,38 @@ class TestList:
             "Highest": "#D50000",  # Red
             "High": "#FF6D00",      # Orange
             "Medium": "#FFD600",   # Gold
-            "Low": "#00C853",     # Green
+            "Low": "#0000FF",     # Blue
             "Lowest": "#18FFFF",    # light blue
             "Can't Automate": "#9E9E9E"  # Gray
         }
+        
+        # Track the current section filter
+        self.section_filter_var = tk.StringVar(value="All Sections")
         
         # Create the list view
         self.create_list_view()
     
     def create_list_view(self):
         """Create the list view for prioritized tests"""
+        # Create a filter frame at the top
+        filter_frame = ttk.Frame(self.parent)
+        filter_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        ttk.Label(filter_frame, text="Section Filter:").pack(side=tk.LEFT, padx=5)
+        
+        # Get available sections from the model plus the "All Sections" option
+        sections = ["All Sections"] + sorted(list(self.model.sections))
+        
+        # Create the combobox for section filtering
+        self.section_combo = ttk.Combobox(filter_frame, textvariable=self.section_filter_var, width=25)
+        self.section_combo['values'] = sections
+        self.section_combo.pack(side=tk.LEFT, padx=5)
+        
+        # Bind the combobox selection to update the list
+        self.section_combo.bind('<<ComboboxSelected>>', lambda e: self.update_list())
+        
         # Create treeview for test list with scrollbar
-        columns = ("rank", "ticket", "name", "priority", "score")
+        columns = ("rank", "ticket", "name", "section", "priority", "score")
         colored_columns = ("priority", "score")
         
         self.tree_frame = ttk.Frame(self.parent)
@@ -53,15 +73,17 @@ class TestList:
         self.tree.heading("rank", text="Rank")
         self.tree.heading("ticket", text="Ticket ID")
         self.tree.heading("name", text="Test Name")
+        self.tree.heading("section", text="Section")
         self.tree.heading("priority", text="Priority")
         self.tree.heading("score", text="Priority Score")
         
         # Define column widths
-        self.tree.column("rank", width=50)
-        self.tree.column("ticket", width=80)
+        self.tree.column("rank", width=30)
+        self.tree.column("ticket", width=60)
         self.tree.column("name", width=200)
-        self.tree.column("priority", width=80)
-        self.tree.column("score", width=100)
+        self.tree.column("section", width=100)
+        self.tree.column("priority", width=60)
+        self.tree.column("score", width=60)
         
         # Add vertical scrollbar
         vsb = ttk.Scrollbar(self.tree_frame, orient="vertical", command=self.tree.yview)
@@ -76,7 +98,6 @@ class TestList:
         button_frame.pack(fill=tk.X, pady=10)
         
         ttk.Button(button_frame, text="View Details", command=self.view_details).pack(side=tk.LEFT, padx=5)
-        # ttk.Button(button_frame, text="Edit Test", command=self.edit_test).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Delete Test", command=self.delete_test).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Delete All Tests", command=self.delete_all_tests).pack(side=tk.LEFT, padx=5)
         
@@ -88,17 +109,24 @@ class TestList:
             self.tree.tag_configure(priority, foreground=color)
     
     def update_list(self):
-        """Update the test list display with sorted tests"""
+        """Update the test list display with sorted tests, filtered by section if needed"""
         # Clear existing items
         for item in self.tree.get_children():
             self.tree.delete(item)
         
-        # Get sorted tests and add to treeview
-        sorted_tests = self.model.get_sorted_tests()
+        # Get section filter
+        section_filter = self.section_filter_var.get()
         
-        for i, test in enumerate(sorted_tests):
+        # Apply filter if not "All Sections"
+        if section_filter == "All Sections":
+            filtered_tests = self.model.get_sorted_tests()
+        else:
+            filtered_tests = self.model.get_sorted_tests(section_filter=section_filter)
+        
+        for i, test in enumerate(filtered_tests):
             rank = i + 1
             priority = test["priority"]
+            section = test.get("section", "")
             
             # For "Can't Automate" tests, show 0 score
             score_display = "0" if priority == "Can't Automate" else test["total_score"]
@@ -107,10 +135,9 @@ class TestList:
             item_id = self.tree.insert(
                 "", 
                 "end", 
-                values=(rank, test["ticket_id"], test["name"], priority, score_display),
+                values=(rank, test["ticket_id"], test["name"], section, priority, score_display),
                 tags=(priority,)
             )
-        
     
     def get_selected_test(self):
         """

@@ -2,7 +2,7 @@
 test_details.py - Component for displaying test details
 """
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 
 class TestDetailsView:
     """
@@ -39,6 +39,7 @@ class TestDetailsView:
         self.edit_name_var = tk.StringVar(value=self.test["name"])
         self.edit_desc_var = tk.StringVar(value=self.test["description"])
         self.edit_ticket_id_var = tk.StringVar(value=self.test["ticket_id"])
+        self.edit_section_var = tk.StringVar(value=self.test.get("section", ""))
         self.edit_score_vars = {}
         self.edit_yes_no_vars = {}
     
@@ -100,6 +101,32 @@ class TestDetailsView:
             )
             row += 1
             
+            # Section dropdown
+            ttk.Label(self.scrollable_frame, text="Section:").grid(row=row, column=0, sticky=tk.W, pady=5)
+            
+            # Create a frame for section selection
+            section_frame = ttk.Frame(self.scrollable_frame)
+            section_frame.grid(row=row, column=1, sticky=tk.W, pady=5)
+            
+            # Get available sections from the model
+            sections = list(self.model.sections)
+            sections.sort()  # Sort alphabetically
+            
+            # Create the combobox with existing sections
+            self.section_combo = ttk.Combobox(section_frame, textvariable=self.edit_section_var, width=25)
+            self.section_combo['values'] = sections
+            self.section_combo.pack(side=tk.LEFT, padx=(0, 5))
+            
+            # Option to add a new section
+            ttk.Button(
+                section_frame, 
+                text="Add New", 
+                command=self.add_new_section,
+                width=10
+            ).pack(side=tk.LEFT)
+            
+            row += 1
+            
         else:
             # In view mode - show labels
             ttk.Label(self.scrollable_frame, text=f"Test Name: {self.test['name']}", font=("", 12)).grid(
@@ -116,6 +143,13 @@ class TestDetailsView:
                 row=row, column=0, columnspan=2, sticky=tk.W, pady=5
             )
             row += 1
+            
+            # Show section if available
+            if self.test.get("section"):
+                ttk.Label(self.scrollable_frame, text=f"Section: {self.test['section']}", font=("", 12)).grid(
+                    row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+                )
+                row += 1
         
         # If test is in "Can't Automate" category, show simplified view with reason
         if self.test['priority'] == "Can't Automate":
@@ -213,7 +247,7 @@ class TestDetailsView:
             elif self.test['priority'] == "Medium":
                 priority_value.configure(foreground="yellow")
             elif self.test['priority'] == "Low":
-                priority_value.configure(foreground="green")
+                priority_value.configure(foreground="blue")
             else:  # Lowest
                 priority_value.configure(foreground="lightblue")
             
@@ -322,6 +356,22 @@ class TestDetailsView:
             ttk.Button(button_frame, text="Delete Test", command=self.delete_test).pack(side=tk.LEFT, padx=5)
             ttk.Button(button_frame, text="Close", command=self.parent.destroy).pack(side=tk.LEFT, padx=5)
     
+    def add_new_section(self):
+        """Open a dialog to add a new section"""
+        new_section = simpledialog.askstring("New Section", "Enter a new section name:", parent=self.parent)
+        
+        if new_section:
+            # Add to model's sections
+            self.model.sections.add(new_section)
+            
+            # Update combobox values
+            sections = list(self.model.sections)
+            sections.sort()
+            self.section_combo['values'] = sections
+            
+            # Set the combobox to the new value
+            self.edit_section_var.set(new_section)
+    
     def toggle_edit_mode(self):
         """Toggle between view and edit modes"""
         self.is_edit_mode = not self.is_edit_mode
@@ -341,6 +391,7 @@ class TestDetailsView:
             self.edit_name_var.get(),
             self.edit_desc_var.get(),
             self.edit_ticket_id_var.get(),
+            self.edit_section_var.get(),  # Pass section to update_test
             scores,
             yes_no_answers
         )
