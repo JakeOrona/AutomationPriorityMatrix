@@ -151,15 +151,40 @@ class FileOperations:
         report_text = header
         
         # Get the tiers
+        highest_priority = priority_tiers["highest"]
         high_priority = priority_tiers["high"]
         medium_priority = priority_tiers["medium"]
         low_priority = priority_tiers["low"]
+        lowest_priority = priority_tiers["lowest"]
+
+        highest_threshold = priority_tiers["highest_threshold"]
         high_threshold = priority_tiers["high_threshold"]
         medium_threshold = priority_tiers["medium_threshold"]
+        low_threshold = priority_tiers["low_threshold"]
+        lowest_threshold = priority_tiers["lowest_threshold"]
         
-        # High priority section
-        report_text += f"HIGH PRIORITY TESTS (Score >= {high_threshold:.1f}):\n"
+        # Highest priority section
+        report_text += f"HIGHEST PRIORITY TESTS (Score >= {highest_threshold:.1f}):\n"
         report_text += f"Recommended for immediate automation\n"
+        report_text += "-" * 70 + "\n"
+        
+        for i, test in enumerate(highest_priority):
+            report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
+            report_text += f"   Score: {test['total_score']:.1f}\n"
+            report_text += f"   Description: {test['description']}\n"
+            
+            # Add yes/no answers if available
+            if 'yes_no_answers' in test:
+                for key, answer in test['yes_no_answers'].items():
+                    report_text += f"   * {key}: {answer}\n"
+            
+            report_text += "\n"
+        
+        report_text += "\n"
+
+        # High priority section
+        report_text += f"HIGH PRIORITY TESTS (Score {high_threshold:.1f} - {highest_threshold:.1f}):\n"
+        report_text += f"Recommended for second phase automation\n"
         report_text += "-" * 70 + "\n"
         
         for i, test in enumerate(high_priority):
@@ -178,7 +203,7 @@ class FileOperations:
         
         # Medium priority section
         report_text += f"MEDIUM PRIORITY TESTS (Score {medium_threshold:.1f} - {high_threshold:.1f}):\n"
-        report_text += f"Recommended for second phase automation\n"
+        report_text += f"Recommended for third phase automation\n"
         report_text += "-" * 70 + "\n"
         
         for i, test in enumerate(medium_priority):
@@ -190,14 +215,33 @@ class FileOperations:
                 for key, answer in test['yes_no_answers'].items():
                     report_text += f"   * {key}: {answer}\n"
         
+            report_text += "\n"
+        
         report_text += "\n"
         
         # Low priority section
-        report_text += f"LOW PRIORITY TESTS (Score < {medium_threshold:.1f}):\n"
+        report_text += f"LOW PRIORITY TESTS (Score {low_threshold:.1f} - {medium_threshold:.1f}):\n"
         report_text += f"Consider for later phases or keep as manual tests\n"
         report_text += "-" * 70 + "\n"
         
         for i, test in enumerate(low_priority):
+            report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
+            report_text += f"   Score: {test['total_score']:.1f}\n"
+
+            if 'yes_no_answers' in test:
+                for key, answer in test['yes_no_answers'].items():
+                    report_text += f"   * {key}: {answer}\n"
+
+                report_text += "\n"
+        
+        report_text += "\n"
+
+        # Lowest priority section
+        report_text += f"LOWEST PRIORITY TESTS (Score < {low_threshold:.1f}):\n"
+        report_text += f"Consider for backlog or keep as manual tests\n"
+        report_text += "-" * 70 + "\n"
+        
+        for i, test in enumerate(lowest_priority):
             report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"   Score: {test['total_score']:.1f}\n"
 

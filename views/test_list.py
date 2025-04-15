@@ -41,6 +41,7 @@ class TestList:
         """Create the list view for prioritized tests"""
         # Create treeview for test list with scrollbar
         columns = ("rank", "ticket", "name", "priority", "score")
+        colored_columns = ("priority", "score")
         
         self.tree_frame = ttk.Frame(self.parent)
         self.tree_frame.pack(fill=tk.BOTH, expand=True)

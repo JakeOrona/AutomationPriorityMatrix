@@ -44,15 +44,15 @@ class ChartUtils:
         ax = fig.add_subplot(111)
         
         # Count tests by priority
-        priority_counts = {"High": 0, "Medium": 0, "Low": 0}
+        priority_counts = {"Highest" : 0,"High": 0, "Medium": 0, "Low": 0, "Lowest": 0}
         for test in tests:
             priority_counts[test["priority"]] += 1
         
         # Create pie chart
         labels = list(priority_counts.keys())
         sizes = list(priority_counts.values())
-        colors = ['green', 'orange', 'red']
-        explode = (0.1, 0, 0)  # Explode the 1st slice (High priority)
+        colors = ['red', 'orange', 'yellow', 'green', 'lightblue']
+        explode = (0.1, 0, 0, 0, 0)  # Explode the 1st slice (Highest priority)
         
         # Plot if there's data
         if sum(sizes) > 0:
@@ -101,20 +101,30 @@ class ChartUtils:
             ax.set_ylabel('Number of Tests')
             ax.set_xticks(bins)
             
-            # Calculate threshold values
+            # Calculate thresholds
             max_score = 100
-            high_threshold = max_score * 0.85
-            medium_threshold = max_score * 0.5
+            
+            highest_threshold = max_score * 0.90
+            high_threshold = max_score * 0.80
+            medium_threshold = max_score * 0.60
+            low_threshold = max_score * 0.40
+            lowest_threshold = max_score * 0.20
             
             # Add vertical lines for threshold values
-            ax.axvline(x=high_threshold, color='green', linestyle='--', 
-                      label=f'High Threshold ({high_threshold:.1f})')
+            ax.axvline(x=highest_threshold, color='red', linestyle='--', 
+                        label=f'Highest Threshold ({highest_threshold:.1f})')
             ax.axvline(x=medium_threshold, color='orange', linestyle='--', 
-                      label=f'Medium Threshold ({medium_threshold:.1f})')
+                        label=f'High Threshold ({high_threshold:.1f})'),
+            ax.axvline(x=medium_threshold, color='yellow', linestyle='--', 
+                        label=f'Medium Threshold ({medium_threshold:.1f})'),
+            ax.axvline(x=low_threshold, color='green', linestyle='--', 
+                        label=f'Low Threshold ({low_threshold:.1f})'),
+            ax.axvline(x=lowest_threshold, color='lightblue', linestyle='--',
+                        label=f'Lowest Threshold ({lowest_threshold:.1f})')
             ax.legend()
         else:
             ax.text(0.5, 0.5, "No data available", horizontalalignment='center',
-                  verticalalignment='center', transform=ax.transAxes)
+                    verticalalignment='center', transform=ax.transAxes)
         
         return fig, ax
     
@@ -209,7 +219,7 @@ class ChartUtils:
             
             # Create horizontal bar chart
             test_names = [test["name"] if len(test["name"]) <= 20 else test["name"][:17] + "..." 
-                         for test in top_tests]
+                            for test in top_tests]
             test_scores = [test["total_score"] for test in top_tests]
             
             # Reverse lists for bottom-to-top display
@@ -219,12 +229,16 @@ class ChartUtils:
             # Create color map based on priority
             colors = []
             for test in reversed(top_tests):
-                if test["priority"] == "High":
-                    colors.append("green")
-                elif test["priority"] == "Medium":
-                    colors.append("orange")
-                else:
+                if test["priority"] == "Highest":
                     colors.append("red")
+                elif test["priority"] == "High":
+                    colors.append("orange")
+                elif test["priority"] == "Medium":
+                    colors.append("yellow")
+                elif test["priority"] == "Low":
+                    colors.append("green")
+                else:
+                    colors.append("lightblue")
             
             # Plot horizontal bars
             bars = ax.barh(range(len(test_names)), test_scores, color=colors)
