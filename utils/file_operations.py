@@ -131,13 +131,14 @@ class FileOperations:
             return False, error_message
     
     @staticmethod
-    def generate_report_text(tests, priority_tiers):
+    def generate_report_text(tests, priority_tiers, model=None):
         """
         Generate text for the prioritization report
         
         Args:
             tests (list): List of all test dictionaries
             priority_tiers (dict): Dictionary with high, medium, and low priority tests
+            model: The prioritization model (added parameter)
             
         Returns:
             str: Formatted report text
@@ -162,7 +163,7 @@ class FileOperations:
         medium_threshold = priority_tiers["medium_threshold"]
         low_threshold = priority_tiers["low_threshold"]
         lowest_threshold = priority_tiers["lowest_threshold"]
-        
+
         # Highest priority section
         report_text += f"HIGHEST PRIORITY TESTS (Score >= {highest_threshold:.1f}):\n"
         report_text += f"Recommended for immediate automation\n"
@@ -173,6 +174,15 @@ class FileOperations:
             report_text += f"   Score: {test['total_score']:.1f}\n"
             report_text += f"   Description: {test['description']}\n"
             
+            # Add score details with descriptions
+            if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                report_text += f"   Factor Scores:\n"
+                for factor, score in test['scores'].items():
+                    if factor in model.factors and score in model.score_options.get(factor, {}):
+                        factor_name = model.factors[factor]["name"]
+                        score_description = model.score_options[factor][score]
+                        report_text += f"     - {factor_name}: {score} - {score_description}\n"
+            
             # Add yes/no answers if available
             if 'yes_no_answers' in test:
                 for key, answer in test['yes_no_answers'].items():
@@ -181,7 +191,7 @@ class FileOperations:
             report_text += "\n"
         
         report_text += "\n"
-
+        
         # High priority section
         report_text += f"HIGH PRIORITY TESTS (Score {high_threshold:.1f} - {highest_threshold:.1f}):\n"
         report_text += f"Recommended for second phase automation\n"
@@ -191,6 +201,15 @@ class FileOperations:
             report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"   Score: {test['total_score']:.1f}\n"
             report_text += f"   Description: {test['description']}\n"
+            
+            # Add score details with descriptions
+            if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                report_text += f"   Factor Scores:\n"
+                for factor, score in test['scores'].items():
+                    if factor in model.factors and score in model.score_options.get(factor, {}):
+                        factor_name = model.factors[factor]["name"]
+                        score_description = model.score_options[factor][score]
+                        report_text += f"     - {factor_name}: {score} - {score_description}\n"
             
             # Add yes/no answers if available
             if 'yes_no_answers' in test:
@@ -210,11 +229,20 @@ class FileOperations:
             report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"   Score: {test['total_score']:.1f}\n"
             
+            # Add score details with descriptions
+            if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                report_text += f"   Factor Scores:\n"
+                for factor, score in test['scores'].items():
+                    if factor in model.factors and score in model.score_options.get(factor, {}):
+                        factor_name = model.factors[factor]["name"]
+                        score_description = model.score_options[factor][score]
+                        report_text += f"     - {factor_name}: {score} - {score_description}\n"
+            
             # Add yes/no answers if available
             if 'yes_no_answers' in test:
                 for key, answer in test['yes_no_answers'].items():
                     report_text += f"   * {key}: {answer}\n"
-        
+            
             report_text += "\n"
         
         report_text += "\n"
@@ -228,26 +256,48 @@ class FileOperations:
             report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"   Score: {test['total_score']:.1f}\n"
 
+            # Add score details with descriptions
+            if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                report_text += f"   Factor Scores:\n"
+                for factor, score in test['scores'].items():
+                    if factor in model.factors and score in model.score_options.get(factor, {}):
+                        factor_name = model.factors[factor]["name"]
+                        score_description = model.score_options[factor][score]
+                        report_text += f"     - {factor_name}: {score} - {score_description}\n"
+
             if 'yes_no_answers' in test:
                 for key, answer in test['yes_no_answers'].items():
                     report_text += f"   * {key}: {answer}\n"
-
-                report_text += "\n"
-        
+                    
+            report_text += "\n"
+            
         report_text += "\n"
 
         # Lowest priority section
-        report_text += f"LOWEST PRIORITY TESTS (Score < {low_threshold:.1f}):\n"
-        report_text += f"Consider for backlog or keep as manual tests\n"
+        report_text += f"LOWEST PRIORITY TESTS (Score <= {low_threshold:.1f}):\n"
+        report_text += f"Not Recommended for automation\n"
         report_text += "-" * 70 + "\n"
         
         for i, test in enumerate(lowest_priority):
             report_text += f"{i+1}. {test['name']} (ID: {test['id']})\n"
             report_text += f"   Score: {test['total_score']:.1f}\n"
-
+            report_text += f"   Description: {test['description']}\n"
+            
+            # Add score details with descriptions
+            if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                report_text += f"   Factor Scores:\n"
+                for factor, score in test['scores'].items():
+                    if factor in model.factors and score in model.score_options.get(factor, {}):
+                        factor_name = model.factors[factor]["name"]
+                        score_description = model.score_options[factor][score]
+                        report_text += f"     - {factor_name}: {score} - {score_description}\n"
+            
+            # Add yes/no answers if available
             if 'yes_no_answers' in test:
                 for key, answer in test['yes_no_answers'].items():
                     report_text += f"   * {key}: {answer}\n"
+            
+            report_text += "\n"
         
         return report_text
     
