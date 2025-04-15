@@ -56,7 +56,7 @@ class FileOperations:
                 # Ensure description is never None or NaN
                 description = test.get("description", "")
                 if description is None or description == "nan" or (hasattr(description, "lower") and description.lower() == "nan"):
-                    description = ""
+                    description = "NULL"
                     
                 row = {
                     "Test ID": test["id"],

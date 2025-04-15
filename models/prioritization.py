@@ -280,8 +280,8 @@ class TestPrioritizationModel:
 
             # Handle potentially NaN description values
             description = data.get("Description", "")
-            if description == "nan" or description is None or (hasattr(description, "lower") and description.lower() == "nan"):
-                description = ""
+            if description == "NaN" or description == "nan" or description is None or (hasattr(description, "lower") and description.lower() == "nan"):
+                description = "NULL"
             
             test = {
                 "id": test_id,

@@ -46,7 +46,7 @@ class TestDetailsView:
         """Create the details view"""
         # Set window title
         self.parent.title(f"Test Details: {self.test['name']}")
-        self.parent.geometry("700x1000")
+        self.parent.geometry("600x1000")
         
         # Create main frame with padding
         main_frame = ttk.Frame(self.parent, padding=10)
