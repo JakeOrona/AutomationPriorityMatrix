@@ -139,7 +139,7 @@ class FileOperations:
         
         Args:
             tests (list): List of all test dictionaries
-            priority_tiers (dict): Dictionary with high, medium, and low priority tests
+            priority_tiers (dict): Dictionary with priority tier tests
             model: The prioritization model (added parameter)
             
         Returns:
@@ -159,6 +159,7 @@ class FileOperations:
         medium_priority = priority_tiers["medium"]
         low_priority = priority_tiers["low"]
         lowest_priority = priority_tiers["lowest"]
+        cant_automate = priority_tiers.get("cant_automate", [])  # Get "Can't Automate" tests if available
 
         highest_threshold = priority_tiers["highest_threshold"]
         high_threshold = priority_tiers["high_threshold"]
@@ -327,6 +328,46 @@ class FileOperations:
             report_text += "|\n"
         
         report_text += "-" * 70 + "\n"
+        
+        report_text += "\n"
+        
+        # Can't Automate section (new)
+        if cant_automate:
+            report_text += f"TESTS THAT CAN'T BE AUTOMATED:\n"
+            report_text += f"These tests have been identified as not possible to automate\n"
+            report_text += "-" * 70 + "\n"
+            
+            for i, test in enumerate(cant_automate):
+                report_text += f"| {i+1}. {test['name']} (ID: {test['id']})\n"
+                
+                # Add description if available
+                if 'description' in test:
+                    report_text += f"|    Description: {test['description']}\n"
+                
+                # Add score details with descriptions
+                if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                    report_text += f"|    Factor Scores:\n"
+                    # First show the "Can it be automated?" factor to explain why it's in this category
+                    if "can_be_automated" in test['scores'] and test['scores']["can_be_automated"] == 1:
+                        factor_name = model.factors["can_be_automated"]["name"]
+                        score_description = model.score_options["can_be_automated"][1]
+                        report_text += f"|      - {factor_name}: 1 - {score_description}\n"
+                        
+                    # Then show other factors
+                    for factor, score in test['scores'].items():
+                        if factor != "can_be_automated" and factor in model.factors and score in model.score_options.get(factor, {}):
+                            factor_name = model.factors[factor]["name"]
+                            score_description = model.score_options[factor][score]
+                            report_text += f"|      - {factor_name}: {score} - {score_description}\n"
+                
+                # Add yes/no answers if available
+                if 'yes_no_answers' in test:
+                    for key, answer in test['yes_no_answers'].items():
+                        report_text += f"|    * {key}: {answer}\n"
+                
+                report_text += "|\n"
+            
+            report_text += "-" * 70 + "\n"
         
         return report_text
     

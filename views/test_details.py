@@ -117,44 +117,108 @@ class TestDetailsView:
             )
             row += 1
         
-        # Show raw and normalized scores (always in view mode)
-        max_possible_raw = sum(5 * details["weight"] for factor, details in self.model.factors.items())
-        ttk.Label(self.scrollable_frame, text=f"Raw Score: {self.test['raw_score']} / {max_possible_raw}", font=("", 12)).grid(
-            row=row, column=0, columnspan=2, sticky=tk.W, pady=5
-        )
-        row += 1
-        
-        ttk.Label(self.scrollable_frame, text=f"Priority Score: {self.test['total_score']} / 100", font=("", 12, "bold")).grid(
-            row=row, column=0, columnspan=2, sticky=tk.W, pady=5
-        )
-        row += 1
-        
-        # Priority category with color
-        priority_frame = ttk.Frame(self.scrollable_frame)
-        priority_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=5)
-        
-        ttk.Label(priority_frame, text="Priority: ", font=("", 12)).pack(side=tk.LEFT)
-        
-        priority_value = tk.Label(
-            priority_frame, 
-            text=self.test['priority'],
-            font=("", 12, "bold")
-        )
-        
-        # Set color based on priority
-        if self.test['priority'] == "Highest":
-            priority_value.configure(foreground="red")
-        elif self.test['priority'] == "High":
-            priority_value.configure(foreground="orange")
-        elif self.test['priority'] == "Medium":
-            priority_value.configure(foreground="yellow")
-        elif self.test['priority'] == "Low":
-            priority_value.configure(foreground="green")
-        else:  # Lowest
-            priority_value.configure(foreground="blue")
-        
-        priority_value.pack(side=tk.LEFT)
-        row += 1
+        # If test is in "Can't Automate" category, show simplified view with reason
+        if self.test['priority'] == "Can't Automate":
+            # Show raw score as 0 and note that it can't be automated
+            ttk.Label(self.scrollable_frame, text=f"Raw Score: 0 (Test cannot be automated)", font=("", 12)).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+            )
+            row += 1
+            
+            ttk.Label(self.scrollable_frame, text=f"Priority Score: 0 / 100", font=("", 12, "bold")).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+            )
+            row += 1
+            
+            # Priority category with color
+            priority_frame = ttk.Frame(self.scrollable_frame)
+            priority_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=5)
+            
+            ttk.Label(priority_frame, text="Priority: ", font=("", 12)).pack(side=tk.LEFT)
+            
+            priority_value = tk.Label(
+                priority_frame, 
+                text=self.test['priority'],
+                font=("", 12, "bold")
+            )
+            
+            # Set color for "Can't Automate"
+            priority_value.configure(foreground="gray")
+            
+            priority_value.pack(side=tk.LEFT)
+            row += 1
+            
+            # Display the "Can it be automated?" factor first
+            if "can_be_automated" in self.test["scores"]:
+                factor_frame = ttk.LabelFrame(self.scrollable_frame, text="Can it be automated?")
+                factor_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
+                
+                if self.is_edit_mode:
+                    # In edit mode - show radio buttons
+                    self.edit_score_vars["can_be_automated"] = tk.IntVar(value=self.test["scores"]["can_be_automated"])
+                    
+                    for score, label in self.model.score_options["can_be_automated"].items():
+                        rb = ttk.Radiobutton(
+                            factor_frame, 
+                            text=f"{score} - {label}", 
+                            variable=self.edit_score_vars["can_be_automated"], 
+                            value=score
+                        )
+                        rb.pack(anchor=tk.W)
+                else:
+                    # In view mode - show current value
+                    factor_description = self.model.score_options["can_be_automated"][1]  # "No"
+                    ttk.Label(factor_frame, text=f"Score: 1 - {factor_description}").grid(
+                        row=0, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                    ttk.Label(factor_frame, text=f"Weight: {self.model.factors['can_be_automated']['weight']}").grid(
+                        row=1, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                    ttk.Label(factor_frame, text="Tests marked as 'Cannot be automated' are assigned zero priority.").grid(
+                        row=2, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                
+                row += 1
+        else:
+            # Regular test - show normal score information
+            max_possible_raw = sum(5 * details["weight"] for factor, details in self.model.factors.items() 
+                                if factor != "can_be_automated")
+            ttk.Label(self.scrollable_frame, text=f"Raw Score: {self.test['raw_score']} / {max_possible_raw}", font=("", 12)).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+            )
+            row += 1
+            
+            ttk.Label(self.scrollable_frame, text=f"Priority Score: {self.test['total_score']} / 100", font=("", 12, "bold")).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+            )
+            row += 1
+            
+            # Priority category with color
+            priority_frame = ttk.Frame(self.scrollable_frame)
+            priority_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=5)
+            
+            ttk.Label(priority_frame, text="Priority: ", font=("", 12)).pack(side=tk.LEFT)
+            
+            priority_value = tk.Label(
+                priority_frame, 
+                text=self.test['priority'],
+                font=("", 12, "bold")
+            )
+            
+            # Set color based on priority
+            if self.test['priority'] == "Highest":
+                priority_value.configure(foreground="red")
+            elif self.test['priority'] == "High":
+                priority_value.configure(foreground="orange")
+            elif self.test['priority'] == "Medium":
+                priority_value.configure(foreground="yellow")
+            elif self.test['priority'] == "Low":
+                priority_value.configure(foreground="green")
+            else:  # Lowest
+                priority_value.configure(foreground="lightblue")
+            
+            priority_value.pack(side=tk.LEFT)
+            row += 1
         
         # Display factor scores
         ttk.Label(self.scrollable_frame, text="Score Breakdown:", font=("", 12, "underline")).grid(
@@ -163,6 +227,10 @@ class TestDetailsView:
         row += 1
         
         for factor, details in self.model.factors.items():
+            # For can't automate tests, skip displaying other factors if we're in view mode
+            if self.test['priority'] == "Can't Automate" and factor != "can_be_automated" and not self.is_edit_mode:
+                continue
+                
             current_score = self.test["scores"].get(factor, 3)  # Default to 3 if missing
             
             # Create frame with border for each factor
@@ -193,9 +261,12 @@ class TestDetailsView:
                 ttk.Label(factor_frame, text=f"Weight: {factor_weight}").grid(
                     row=1, column=0, sticky=tk.W, padx=5, pady=2
                 )
-                ttk.Label(factor_frame, text=f"Contribution: {factor_contribution} points").grid(
-                    row=2, column=0, sticky=tk.W, padx=5, pady=2
-                )
+                
+                # Only show contribution if not the "can_be_automated" factor (which has 0 weight)
+                if factor != "can_be_automated":
+                    ttk.Label(factor_frame, text=f"Contribution: {factor_contribution} points").grid(
+                        row=2, column=0, sticky=tk.W, padx=5, pady=2
+                    )
             
             row += 1
         

@@ -79,9 +79,61 @@ class TestForm:
         
         form_row += 1
 
-        # Scoring factors
-        
+        # Scoring factors - First add "Can it be automated?" with a note about its importance
+        if "can_be_automated" in self.model.factors:
+            automation_frame = ttk.LabelFrame(scrollable_frame, text="Automation Possibility Assessment")
+            automation_frame.grid(row=form_row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=10, padx=5)
+            
+            # Add an info label explaining the importance of this factor
+            ttk.Label(
+                automation_frame, 
+                text="If 'No' is selected, the test will be categorized as 'Can't Automate'\n" +
+                    "and will receive a priority score of 0.",
+                font=("", 9, "italic")
+            ).pack(pady=5, padx=5, anchor=tk.W)
+            
+            factor_frame = ttk.Frame(automation_frame)
+            factor_frame.pack(fill=tk.X, padx=5, pady=5)
+            
+            ttk.Label(factor_frame, text=self.model.factors["can_be_automated"]["name"]).pack(side=tk.LEFT, padx=5)
+            
+            # Create radio buttons for the automation possibility
+            self.score_vars["can_be_automated"] = tk.IntVar(value=5)  # Default to Yes (5)
+            
+            radio_frame = ttk.Frame(factor_frame)
+            radio_frame.pack(side=tk.LEFT, padx=20)
+            
+            for score, label in self.model.score_options["can_be_automated"].items():
+                rb = ttk.Radiobutton(
+                    radio_frame, 
+                    text=f"{label}", 
+                    variable=self.score_vars["can_be_automated"], 
+                    value=score
+                )
+                rb.pack(side=tk.LEFT, padx=10)
+            
+            form_row += 1
+            
+            # Add a separator
+            ttk.Separator(scrollable_frame, orient='horizontal').grid(
+                row=form_row, column=0, columnspan=2, sticky=tk.EW, pady=10
+            )
+            form_row += 1
+            
+            # Add a header for the remaining factors
+            ttk.Label(
+                scrollable_frame, 
+                text="Prioritization Factors (Only applicable if the test can be automated)",
+                font=("", 10, "bold")
+            ).grid(row=form_row, column=0, columnspan=2, sticky=tk.W, pady=5)
+            form_row += 1
+
+        # Remaining scoring factors
         for factor, details in self.model.factors.items():
+            # Skip the can_be_automated factor as it's already handled
+            if factor == "can_be_automated":
+                continue
+                
             ttk.Label(scrollable_frame, text=f"{details['name']} (weight: {details['weight']}):").grid(
                 row=form_row, column=0, sticky=tk.W, pady=5
             )
@@ -176,10 +228,19 @@ class TestForm:
         self.test_name_var.set("")
         self.test_desc_var.set("")
         self.ticket_id_var.set("AUTO-")
-        for var in self.score_vars.values():
-            var.set(3)  # Reset to medium (3)
+        
+        # Reset automation possibility to Yes (5)
+        if "can_be_automated" in self.score_vars:
+            self.score_vars["can_be_automated"].set(5)
+            
+        # Reset other scores to medium (3)
+        for factor, var in self.score_vars.items():
+            if factor != "can_be_automated":
+                var.set(3)
+                
+        # Reset yes/no questions to No (False)
         for var in self.yes_no_vars.values():
-            var.set(False)  # Reset to No
+            var.set(False)
     
     def set_test_for_editing(self, test):
         """

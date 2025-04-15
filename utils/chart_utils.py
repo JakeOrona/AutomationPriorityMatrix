@@ -44,15 +44,15 @@ class ChartUtils:
         ax = fig.add_subplot(111)
         
         # Count tests by priority
-        priority_counts = {"Highest" : 0,"High": 0, "Medium": 0, "Low": 0, "Lowest": 0}
+        priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
         for test in tests:
             priority_counts[test["priority"]] += 1
         
         # Create pie chart
         labels = list(priority_counts.keys())
         sizes = list(priority_counts.values())
-        colors = ['red', 'orange', 'yellow', 'green', 'lightblue']
-        explode = (0.1, 0, 0, 0, 0)  # Explode the 1st slice (Highest priority)
+        colors = ['red', 'orange', 'yellow', 'green', 'lightblue', 'gray']
+        explode = (0.1, 0, 0, 0, 0, 0)  # Explode the 1st slice (Highest priority)
         
         # Plot if there's data
         if sum(sizes) > 0:
@@ -89,14 +89,17 @@ class ChartUtils:
         fig = Figure(figsize=figure_size)
         ax = fig.add_subplot(111)
         
+        # Filter out "Can't Automate" tests which have a score of 0
+        scorable_tests = [test for test in tests if test["priority"] != "Can't Automate"]
+        
         # Get scores for histogram
-        scores = [test["total_score"] for test in tests]
+        scores = [test["total_score"] for test in scorable_tests]
         
         if scores:
             # Create histogram
             bins = np.linspace(0, 100, 21)  # 20 bins from 0 to 100
             ax.hist(scores, bins=bins, color='skyblue', edgecolor='black')
-            ax.set_title('Test Score Distribution')
+            ax.set_title('Test Score Distribution (Excludes "Can\'t Automate" Tests)')
             ax.set_xlabel('Priority Score')
             ax.set_ylabel('Number of Tests')
             ax.set_xticks(bins)
@@ -113,17 +116,24 @@ class ChartUtils:
             # Add vertical lines for threshold values
             ax.axvline(x=highest_threshold, color='red', linestyle='--', 
                         label=f'Highest Threshold ({highest_threshold:.1f})')
-            ax.axvline(x=medium_threshold, color='orange', linestyle='--', 
-                        label=f'High Threshold ({high_threshold:.1f})'),
+            ax.axvline(x=high_threshold, color='orange', linestyle='--', 
+                        label=f'High Threshold ({high_threshold:.1f})')
             ax.axvline(x=medium_threshold, color='yellow', linestyle='--', 
-                        label=f'Medium Threshold ({medium_threshold:.1f})'),
+                        label=f'Medium Threshold ({medium_threshold:.1f})')
             ax.axvline(x=low_threshold, color='green', linestyle='--', 
-                        label=f'Low Threshold ({low_threshold:.1f})'),
+                        label=f'Low Threshold ({low_threshold:.1f})')
             ax.axvline(x=lowest_threshold, color='lightblue', linestyle='--',
                         label=f'Lowest Threshold ({lowest_threshold:.1f})')
             ax.legend()
+            
+            # Add text about can't automate tests
+            cant_automate_count = len(tests) - len(scorable_tests)
+            if cant_automate_count > 0:
+                ax.text(0.5, 0.95, f'Note: {cant_automate_count} "Can\'t Automate" tests excluded',
+                        horizontalalignment='center', verticalalignment='top',
+                        transform=ax.transAxes, bbox=dict(facecolor='white', alpha=0.8))
         else:
-            ax.text(0.5, 0.5, "No data available", horizontalalignment='center',
+            ax.text(0.5, 0.5, "No scorable tests available", horizontalalignment='center',
                     verticalalignment='center', transform=ax.transAxes)
         
         return fig, ax
@@ -151,14 +161,21 @@ class ChartUtils:
         fig = Figure(figsize=figure_size)
         ax = fig.add_subplot(111)
         
-        if tests:
+        # Filter out "Can't Automate" tests
+        scorable_tests = [test for test in tests if test["priority"] != "Can't Automate"]
+        
+        if scorable_tests:
             # Calculate average scores for each factor
             factor_avgs = {}
             factor_names = {}
             
             for factor, info in factors.items():
-                factor_scores = [test["scores"].get(factor, 0) for test in tests]
-                factor_avgs[factor] = sum(factor_scores) / len(tests)
+                # Skip the can_be_automated factor
+                if factor == "can_be_automated":
+                    continue
+                    
+                factor_scores = [test["scores"].get(factor, 0) for test in scorable_tests]
+                factor_avgs[factor] = sum(factor_scores) / len(scorable_tests)
                 factor_names[factor] = info["name"]
             
             # Create bar chart
@@ -169,7 +186,7 @@ class ChartUtils:
             bars = ax.bar(range(len(factor_keys)), avg_scores, color='lightblue')
             ax.set_xticks(range(len(factor_keys)))
             ax.set_xticklabels(bar_labels, rotation=45, ha='right')
-            ax.set_title('Average Score by Factor')
+            ax.set_title('Average Score by Factor (Excludes "Can\'t Automate" Tests)')
             ax.set_ylabel('Average Score (1-5)')
             ax.set_ylim(0, 5)
             
@@ -180,8 +197,15 @@ class ChartUtils:
                         f'{height:.1f}', ha='center', va='bottom')
             
             fig.tight_layout()  # Adjust layout for rotated labels
+            
+            # Add text about can't automate tests
+            cant_automate_count = len(tests) - len(scorable_tests)
+            if cant_automate_count > 0:
+                ax.text(0.5, 0.95, f'Note: {cant_automate_count} "Can\'t Automate" tests excluded',
+                        horizontalalignment='center', verticalalignment='top',
+                        transform=ax.transAxes, bbox=dict(facecolor='white', alpha=0.8))
         else:
-            ax.text(0.5, 0.5, "No data available", horizontalalignment='center',
+            ax.text(0.5, 0.5, "No scorable tests available", horizontalalignment='center',
                     verticalalignment='center', transform=ax.transAxes)
         
         return fig, ax
@@ -209,9 +233,12 @@ class ChartUtils:
         fig = Figure(figsize=figure_size)
         ax = fig.add_subplot(111)
         
-        if tests:
+        # Filter out "Can't Automate" tests
+        scorable_tests = [test for test in tests if test["priority"] != "Can't Automate"]
+        
+        if scorable_tests:
             # Get sorted tests
-            sorted_tests = sorted(tests, key=lambda x: x["total_score"], reverse=True)
+            sorted_tests = sorted(scorable_tests, key=lambda x: x["total_score"], reverse=True)
             
             # Take top N or fewer
             top_n = min(max_tests, len(sorted_tests))
@@ -237,7 +264,7 @@ class ChartUtils:
                     colors.append("yellow")
                 elif test["priority"] == "Low":
                     colors.append("green")
-                else:
+                else:  # Lowest
                     colors.append("lightblue")
             
             # Plot horizontal bars
@@ -255,8 +282,15 @@ class ChartUtils:
                         f'{width:.1f}', va='center')
             
             fig.tight_layout()  # Adjust layout for long test names
+            
+            # Add text about can't automate tests
+            cant_automate_count = len(tests) - len(scorable_tests)
+            if cant_automate_count > 0:
+                ax.text(0.5, 0.95, f'Note: {cant_automate_count} "Can\'t Automate" tests excluded',
+                        horizontalalignment='center', verticalalignment='top',
+                        transform=ax.transAxes, bbox=dict(facecolor='white', alpha=0.8))
         else:
-            ax.text(0.5, 0.5, "No data available", horizontalalignment='center',
+            ax.text(0.5, 0.5, "No scorable tests available", horizontalalignment='center',
                     verticalalignment='center', transform=ax.transAxes)
         
         return fig, ax

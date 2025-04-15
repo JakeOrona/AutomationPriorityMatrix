@@ -31,7 +31,8 @@ class TestList:
             "High": "#FF6D00",      # Orange
             "Medium": "#FFD600",   # Gold
             "Low": "#00C853",     # Green
-            "Lowest": "#18FFFF"    # light blue
+            "Lowest": "#18FFFF",    # light blue
+            "Can't Automate": "#9E9E9E"  # Gray
         }
         
         # Create the list view
@@ -99,11 +100,14 @@ class TestList:
             rank = i + 1
             priority = test["priority"]
             
+            # For "Can't Automate" tests, show 0 score
+            score_display = "0" if priority == "Can't Automate" else test["total_score"]
+            
             # Insert item with appropriate tag for coloring
             item_id = self.tree.insert(
                 "", 
                 "end", 
-                values=(rank, test["ticket_id"], test["name"], priority, test["total_score"]),
+                values=(rank, test["ticket_id"], test["name"], priority, score_display),
                 tags=(priority,)
             )
         
