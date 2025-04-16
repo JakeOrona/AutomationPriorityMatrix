@@ -2,7 +2,7 @@
 test_details.py - Component for displaying test details
 """
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 
 class TestDetailsView:
     """
@@ -39,6 +39,7 @@ class TestDetailsView:
         self.edit_name_var = tk.StringVar(value=self.test["name"])
         self.edit_desc_var = tk.StringVar(value=self.test["description"])
         self.edit_ticket_id_var = tk.StringVar(value=self.test["ticket_id"])
+        self.edit_section_var = tk.StringVar(value=self.test.get("section", ""))
         self.edit_score_vars = {}
         self.edit_yes_no_vars = {}
     
@@ -46,7 +47,7 @@ class TestDetailsView:
         """Create the details view"""
         # Set window title
         self.parent.title(f"Test Details: {self.test['name']}")
-        self.parent.geometry("600x1000")
+        self.parent.geometry("700x1000")
         
         # Create main frame with padding
         main_frame = ttk.Frame(self.parent, padding=10)
@@ -100,6 +101,32 @@ class TestDetailsView:
             )
             row += 1
             
+            # Section dropdown
+            ttk.Label(self.scrollable_frame, text="Section:").grid(row=row, column=0, sticky=tk.W, pady=5)
+
+            # Create a frame for section selection
+            section_frame = ttk.Frame(self.scrollable_frame)
+            section_frame.grid(row=row, column=1, sticky=tk.W, pady=5)
+
+            # Get available sections from the model - get the LATEST sections
+            sections = list(self.model.sections)
+            sections.sort()  # Sort alphabetically
+
+            # Create the combobox with existing sections
+            self.section_combo = ttk.Combobox(section_frame, textvariable=self.edit_section_var, width=25)
+            self.section_combo['values'] = sections
+            self.section_combo.pack(side=tk.LEFT, padx=(0, 5))
+            
+            # Option to add a new section
+            ttk.Button(
+                section_frame, 
+                text="Add New", 
+                command=self.add_new_section,
+                width=10
+            ).pack(side=tk.LEFT)
+            
+            row += 1
+            
         else:
             # In view mode - show labels
             ttk.Label(self.scrollable_frame, text=f"Test Name: {self.test['name']}", font=("", 12)).grid(
@@ -116,45 +143,116 @@ class TestDetailsView:
                 row=row, column=0, columnspan=2, sticky=tk.W, pady=5
             )
             row += 1
+            
+            # Show section if available
+            if self.test.get("section"):
+                ttk.Label(self.scrollable_frame, text=f"Section: {self.test['section']}", font=("", 12)).grid(
+                    row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+                )
+                row += 1
         
-        # Show raw and normalized scores (always in view mode)
-        max_possible_raw = sum(5 * details["weight"] for factor, details in self.model.factors.items())
-        ttk.Label(self.scrollable_frame, text=f"Raw Score: {self.test['raw_score']} / {max_possible_raw}", font=("", 12)).grid(
-            row=row, column=0, columnspan=2, sticky=tk.W, pady=5
-        )
-        row += 1
-        
-        ttk.Label(self.scrollable_frame, text=f"Priority Score: {self.test['total_score']} / 100", font=("", 12, "bold")).grid(
-            row=row, column=0, columnspan=2, sticky=tk.W, pady=5
-        )
-        row += 1
-        
-        # Priority category with color
-        priority_frame = ttk.Frame(self.scrollable_frame)
-        priority_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=5)
-        
-        ttk.Label(priority_frame, text="Priority: ", font=("", 12)).pack(side=tk.LEFT)
-        
-        priority_value = tk.Label(
-            priority_frame, 
-            text=self.test['priority'],
-            font=("", 12, "bold")
-        )
-        
-        # Set color based on priority
-        if self.test['priority'] == "Highest":
-            priority_value.configure(foreground="red")
-        elif self.test['priority'] == "High":
-            priority_value.configure(foreground="orange")
-        elif self.test['priority'] == "Medium":
-            priority_value.configure(foreground="yellow")
-        elif self.test['priority'] == "Low":
-            priority_value.configure(foreground="green")
-        else:  # Lowest
-            priority_value.configure(foreground="blue")
-        
-        priority_value.pack(side=tk.LEFT)
-        row += 1
+        # If test is in "Can't Automate" category, show simplified view with reason
+        if self.test['priority'] == "Can't Automate":
+            # Show raw score as 0 and note that it can't be automated
+            ttk.Label(self.scrollable_frame, text=f"Raw Score: 0 (Test cannot be automated)", font=("", 12)).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+            )
+            row += 1
+            
+            ttk.Label(self.scrollable_frame, text=f"Priority Score: 0 / 100", font=("", 12, "bold")).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+            )
+            row += 1
+            
+            # Priority category with color
+            priority_frame = ttk.Frame(self.scrollable_frame)
+            priority_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=5)
+            
+            ttk.Label(priority_frame, text="Priority: ", font=("", 12)).pack(side=tk.LEFT)
+            
+            priority_value = tk.Label(
+                priority_frame, 
+                text=self.test['priority'],
+                font=("", 12, "bold")
+            )
+            
+            # Set color for "Can't Automate"
+            priority_value.configure(foreground="gray")
+            
+            priority_value.pack(side=tk.LEFT)
+            row += 1
+            
+            # Display the "Can it be automated?" factor first
+            if "can_be_automated" in self.test["scores"]:
+                factor_frame = ttk.LabelFrame(self.scrollable_frame, text="Can it be automated?")
+                factor_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
+                
+                if self.is_edit_mode:
+                    # In edit mode - show radio buttons
+                    self.edit_score_vars["can_be_automated"] = tk.IntVar(value=self.test["scores"]["can_be_automated"])
+                    
+                    for score, label in self.model.score_options["can_be_automated"].items():
+                        rb = ttk.Radiobutton(
+                            factor_frame, 
+                            text=f"{score} - {label}", 
+                            variable=self.edit_score_vars["can_be_automated"], 
+                            value=score
+                        )
+                        rb.pack(anchor=tk.W)
+                else:
+                    # In view mode - show current value
+                    factor_description = self.model.score_options["can_be_automated"][1]  # "No"
+                    ttk.Label(factor_frame, text=f"Score: 1 - {factor_description}").grid(
+                        row=0, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                    ttk.Label(factor_frame, text=f"Weight: {self.model.factors['can_be_automated']['weight']}").grid(
+                        row=1, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                    ttk.Label(factor_frame, text="Tests marked as 'Cannot be automated' are assigned zero priority.").grid(
+                        row=2, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                
+                row += 1
+        else:
+            # Regular test - show normal score information
+            max_possible_raw = sum(5 * details["weight"] for factor, details in self.model.factors.items() 
+                                if factor != "can_be_automated")
+            ttk.Label(self.scrollable_frame, text=f"Raw Score: {self.test['raw_score']} / {max_possible_raw}", font=("", 12)).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+            )
+            row += 1
+            
+            ttk.Label(self.scrollable_frame, text=f"Priority Score: {self.test['total_score']} / 100", font=("", 12, "bold")).grid(
+                row=row, column=0, columnspan=2, sticky=tk.W, pady=5
+            )
+            row += 1
+            
+            # Priority category with color
+            priority_frame = ttk.Frame(self.scrollable_frame)
+            priority_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W, pady=5)
+            
+            ttk.Label(priority_frame, text="Priority: ", font=("", 12)).pack(side=tk.LEFT)
+            
+            priority_value = tk.Label(
+                priority_frame, 
+                text=self.test['priority'],
+                font=("", 12, "bold")
+            )
+            
+            # Set color based on priority
+            if self.test['priority'] == "Highest":
+                priority_value.configure(foreground="red")
+            elif self.test['priority'] == "High":
+                priority_value.configure(foreground="orange")
+            elif self.test['priority'] == "Medium":
+                priority_value.configure(foreground="yellow")
+            elif self.test['priority'] == "Low":
+                priority_value.configure(foreground="blue")
+            else:  # Lowest
+                priority_value.configure(foreground="lightblue")
+            
+            priority_value.pack(side=tk.LEFT)
+            row += 1
         
         # Display factor scores
         ttk.Label(self.scrollable_frame, text="Score Breakdown:", font=("", 12, "underline")).grid(
@@ -163,6 +261,10 @@ class TestDetailsView:
         row += 1
         
         for factor, details in self.model.factors.items():
+            # For can't automate tests, skip displaying other factors if we're in view mode
+            if self.test['priority'] == "Can't Automate" and factor != "can_be_automated" and not self.is_edit_mode:
+                continue
+                
             current_score = self.test["scores"].get(factor, 3)  # Default to 3 if missing
             
             # Create frame with border for each factor
@@ -193,9 +295,12 @@ class TestDetailsView:
                 ttk.Label(factor_frame, text=f"Weight: {factor_weight}").grid(
                     row=1, column=0, sticky=tk.W, padx=5, pady=2
                 )
-                ttk.Label(factor_frame, text=f"Contribution: {factor_contribution} points").grid(
-                    row=2, column=0, sticky=tk.W, padx=5, pady=2
-                )
+                
+                # Only show contribution if not the "can_be_automated" factor (which has 0 weight)
+                if factor != "can_be_automated":
+                    ttk.Label(factor_frame, text=f"Contribution: {factor_contribution} points").grid(
+                        row=2, column=0, sticky=tk.W, padx=5, pady=2
+                    )
             
             row += 1
         
@@ -251,6 +356,22 @@ class TestDetailsView:
             ttk.Button(button_frame, text="Delete Test", command=self.delete_test).pack(side=tk.LEFT, padx=5)
             ttk.Button(button_frame, text="Close", command=self.parent.destroy).pack(side=tk.LEFT, padx=5)
     
+    def add_new_section(self):
+        """Open a dialog to add a new section"""
+        new_section = simpledialog.askstring("New Section", "Enter a new section name:", parent=self.parent)
+        
+        if new_section:
+            # Add to model's sections
+            self.model.sections.add(new_section)
+            
+            # Update combobox values
+            sections = list(self.model.sections)
+            sections.sort()
+            self.section_combo['values'] = sections
+            
+            # Set the combobox to the new value
+            self.edit_section_var.set(new_section)
+    
     def toggle_edit_mode(self):
         """Toggle between view and edit modes"""
         self.is_edit_mode = not self.is_edit_mode
@@ -268,6 +389,7 @@ class TestDetailsView:
         updated_test = self.model.update_test(
             self.test["id"],
             self.edit_name_var.get(),
+            self.edit_section_var.get(),
             self.edit_desc_var.get(),
             self.edit_ticket_id_var.get(),
             scores,

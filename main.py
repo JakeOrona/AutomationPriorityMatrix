@@ -12,12 +12,12 @@ def main():
     # Create the root window
     root = tk.Tk()
     root.title("Test Automation Prioritization Tool")
-    root.geometry("1600x800")
+    root.geometry("1430x870")
     
     # Create the model
     model = TestPrioritizationModel()
     
-    # Create the main application window
+    # Initialize the main window with the model
     app = MainWindow(root, model)
     
     # Start the main event loop

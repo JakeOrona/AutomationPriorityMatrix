@@ -22,8 +22,6 @@ class TextReportView(BaseReportView):
     
     def create_report_content(self):
         """Create the text report content"""
-        self.parent.geometry("700x1000")
-        
         # Get priority tiers
         priority_tiers = self.model.get_priority_tiers()
         
