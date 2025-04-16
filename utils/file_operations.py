@@ -32,10 +32,11 @@ class FileOperations:
         """
         try:
             # Sort tests by score (descending)
-            sorted_tests = sorted(tests, key=lambda x: x["total_score"], reverse=True)
+            sorted_tests = sorted(tests, key=lambda x: x.get("total_score", 0), reverse=True)
             
             # Create field names (column headers)
-            field_names = ["Test ID", "Ticket ID", "Section", "Test Name", "Description", "Raw Score", "Total Score (100-point)"]
+            field_names = ["Rank", "Priority", "Ticket ID", "Section", "Test Name", "Description", 
+                            "Total Score (100-point)", "Raw Score", "Test ID"]
             
             # Add factor score headers
             for factor_key, factor_info in factors.items():
@@ -52,26 +53,31 @@ class FileOperations:
             
             # Prepare data for export
             data = []
-            for test in sorted_tests:
+            for i, test in enumerate(sorted_tests):
                 # Ensure description is never None or NaN
                 description = test.get("description", "")
                 if description is None or description == "nan" or (hasattr(description, "lower") and description.lower() == "nan"):
                     description = ""
-                    
+                
+                # Create row dictionary    
                 row = {
-                    "Test ID": test["id"],
+                    "Rank": i + 1,
+                    "Priority": test.get("priority", ""),
                     "Ticket ID": test.get("ticket_id", "N/A"),
                     "Section": test.get("section", ""),
-                    "Test Name": test["name"],
+                    "Test Name": test.get("name", ""),
                     "Description": description,
-                    "Raw Score": test.get("raw_score", "N/A"),
-                    "Total Score (100-point)": test["total_score"]
+                    "Total Score (100-point)": test.get("total_score", 0),
+                    "Raw Score": test.get("raw_score", "N/A")
+                    
                 }
                 
                 # Add factor scores
-                for factor, score in test["scores"].items():
+                for factor in factors:
                     factor_name = factors[factor]["name"]
-                    row[factor_name] = score
+                    # Get scores safely, defaulting to 0 if not present
+                    scores = test.get("scores", {})
+                    row[factor_name] = scores.get(factor, 0)
                 
                 # Add yes/no answers if available
                 if has_yes_no and 'yes_no_answers' in test:
@@ -79,6 +85,8 @@ class FileOperations:
                         question_text = f"Question: {question_key}"
                         row[question_text] = "Yes" if answer else "No"
                 
+                row["Test ID"] = test.get("id", "")
+
                 data.append(row)
             
             # Use pandas if available, otherwise use the built-in csv module

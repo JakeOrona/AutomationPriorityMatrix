@@ -30,7 +30,7 @@ class TestList:
             "Highest": "#D50000",  # Red
             "High": "#FF6D00",      # Orange
             "Medium": "#FFD600",   # Gold
-            "Low": "#0000FF",     # Blue
+            "Low": "#00FFFF",     # Cyan
             "Lowest": "#18FFFF",    # light blue
             "Can't Automate": "#9E9E9E"  # Gray
         }

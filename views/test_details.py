@@ -245,9 +245,9 @@ class TestDetailsView:
             elif self.test['priority'] == "High":
                 priority_value.configure(foreground="orange")
             elif self.test['priority'] == "Medium":
-                priority_value.configure(foreground="yellow")
+                priority_value.configure(foreground="gold")
             elif self.test['priority'] == "Low":
-                priority_value.configure(foreground="blue")
+                priority_value.configure(foreground="cyan")
             else:  # Lowest
                 priority_value.configure(foreground="lightblue")
             
