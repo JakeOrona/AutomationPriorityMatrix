@@ -94,11 +94,11 @@ class ScoringSystem:
             pass
         
         # Calculate raw score
-        raw_score = sum(scores[factor] * factors_copy[factor]["weight"] 
+        raw_score = sum((scores[factor] ** 1.5) * factors_copy[factor]["weight"] 
                     for factor in factors_copy if factor in scores) + bonus_points
         
         # Calculate max possible score for normalization
-        max_raw_score = sum(5 * factors_copy[factor]["weight"] for factor in factors_copy)
+        max_raw_score = sum((5 ** 1.5) * factors_copy[factor]["weight"] for factor in factors_copy)
         
         # Normalize to 100-point scale
         normalized_score = (raw_score / max_raw_score) * 100
@@ -121,11 +121,11 @@ class ScoringSystem:
             return "Can't Automate"
 
         # Define thresholds for categories
-        if score >= 90:
+        if score >= 85:
             return "Highest"
-        elif score >= 80:
+        elif score >= 70:
             return "High"
-        elif score >= 60:
+        elif score >= 55:
             return "Medium"
         elif score >= 40:
             return "Low"

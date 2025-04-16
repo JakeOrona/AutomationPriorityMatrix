@@ -287,9 +287,9 @@ class TestPrioritizationModel:
         # Calculate thresholds
         max_score = 100
         
-        highest_threshold = max_score * 0.90
-        high_threshold = max_score * 0.80
-        medium_threshold = max_score * 0.60
+        highest_threshold = max_score * 0.85
+        high_threshold = max_score * 0.70
+        medium_threshold = max_score * 0.55
         low_threshold = max_score * 0.40
         lowest_threshold = max_score * 0.20
         
