@@ -21,7 +21,21 @@ class TextReportView(BaseReportView):
         super().__init__(parent, model, "Test Automation Priority Report")
     
     def create_report_content(self):
-        """Create the text report content with export options"""
+        """
+        Text-based prioritization report view with tabs for text and markdown format
+        """
+        def __init__(self, parent, model):
+            """
+            Initialize the text report view
+            
+            Args:
+                parent: The parent window
+                model: The prioritization model
+            """
+            super().__init__(parent, model, "Test Automation Priority Report")
+    
+    def create_report_content(self):
+        """Create the text report content with tabs for different formats"""
         # Get priority tiers
         priority_tiers = self.model.get_priority_tiers()
         
@@ -31,26 +45,56 @@ class TextReportView(BaseReportView):
         # Generate markdown report
         self.markdown_report = FileOperations.generate_markdown_report(self.model.tests, priority_tiers, self.model)
         
-        # Create scrollable text widget
-        text_frame = ttk.Frame(self.main_frame)
-        text_frame.pack(fill=tk.BOTH, expand=True)
+        # Create notebook with tabs
+        self.notebook = ttk.Notebook(self.main_frame)
+        self.notebook.pack(fill=tk.BOTH, expand=True)
         
+        # Create tab for plain text report
+        text_frame = ttk.Frame(self.notebook)
+        self.notebook.add(text_frame, text="Plain Text")
+        
+        # Add text widget to text tab
         self.text_widget = tk.Text(text_frame, wrap=tk.WORD, padx=10, pady=10)
-        scrollbar = ttk.Scrollbar(text_frame, orient="vertical", command=self.text_widget.yview)
-        self.text_widget.configure(yscrollcommand=scrollbar.set)
+        text_scrollbar = ttk.Scrollbar(text_frame, orient="vertical", command=self.text_widget.yview)
+        self.text_widget.configure(yscrollcommand=text_scrollbar.set)
         
         self.text_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        text_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
         # Insert report text
         self.text_widget.insert(tk.END, self.report_text)
         
         # Make text widget read-only
         self.text_widget.configure(state="disabled")
-
+        
+        # Create tab for markdown report
+        md_frame = ttk.Frame(self.notebook)
+        self.notebook.add(md_frame, text="Markdown")
+        
+        # Add text widget to markdown tab
+        self.md_widget = tk.Text(md_frame, wrap=tk.WORD, padx=10, pady=10)
+        md_scrollbar = ttk.Scrollbar(md_frame, orient="vertical", command=self.md_widget.yview)
+        self.md_widget.configure(yscrollcommand=md_scrollbar.set)
+        
+        self.md_widget.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        md_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Insert markdown text
+        self.md_widget.insert(tk.END, self.markdown_report)
+        
+        # Make markdown widget read-only
+        self.md_widget.configure(state="disabled")
+        
+        # Try to style the markdown text if possible
+        try:
+            self.apply_basic_markdown_styling(self.md_widget)
+        except Exception as e:
+            # If styling fails, just show plain text
+            print(f"Markdown styling error: {e}")
+        
         # Create an export options frame
         export_frame = ttk.LabelFrame(self.button_frame, text="Export Options")
-        export_frame.pack(side=tk.LEFT, padx=5, pady=5, fill=tk.X)
+        export_frame.pack(side=tk.LEFT, padx=1, pady=1, fill=tk.X)
         
         # Add export buttons
         ttk.Button(
@@ -77,13 +121,6 @@ class TextReportView(BaseReportView):
             command=self.export_word_report
         ).pack(side=tk.LEFT, padx=5, pady=5)
         
-        # Add close button to button frame
-        ttk.Button(
-            self.button_frame, 
-            text="Close", 
-            command=self.parent.destroy
-        ).pack(side=tk.RIGHT, padx=5)
-        
         # Add copy to clipboard button
         ttk.Button(
             self.button_frame,
@@ -91,7 +128,6 @@ class TextReportView(BaseReportView):
             command=self.copy_current_tab_to_clipboard
         ).pack(side=tk.RIGHT, padx=5)
     
-    # Add new export methods
     def export_html_report(self):
         """Export the report as HTML"""
         filename = filedialog.asksaveasfilename(

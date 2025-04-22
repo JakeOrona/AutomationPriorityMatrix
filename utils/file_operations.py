@@ -846,6 +846,144 @@ class FileOperations:
             return False
         
     @staticmethod
+    def export_report_to_html(report_text, filename):
+        """
+        Export markdown report to HTML file
+        
+        Args:
+            report_text (str): Markdown formatted report text
+            filename (str): Path to the output HTML file
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        try:
+            # Try to import markdown module
+            try:
+                import markdown
+                has_markdown = True
+            except ImportError:
+                has_markdown = False
+                
+            if has_markdown:
+                # Convert markdown to HTML using the markdown library
+                html_content = markdown.markdown(report_text)
+                
+                # Add some basic styling
+                styled_html = f"""<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Test Automation Priority Report</title>
+        <style>
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; }}
+            h1 {{ color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }}
+            h2 {{ color: #3498db; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }}
+            h3 {{ color: #2980b9; }}
+            hr {{ border: 0; height: 1px; background: #eee; margin: 30px 0; }}
+            ul {{ margin-left: 20px; }}
+            li {{ margin-bottom: 5px; }}
+            code {{ background: #f8f8f8; padding: 2px 4px; border-radius: 4px; }}
+            strong {{ color: #333; }}
+            em {{ color: #444; }}
+        </style>
+    </head>
+    <body>
+    {html_content}
+    </body>
+    </html>"""
+                
+                # Write to file
+                with open(filename, 'w', encoding='utf-8') as f:
+                    f.write(styled_html)
+            else:
+                # Fallback to basic HTML conversion
+                html_lines = []
+                html_lines.append("<!DOCTYPE html>")
+                html_lines.append("<html><head><meta charset='UTF-8'>")
+                html_lines.append("<title>Test Automation Priority Report</title>")
+                html_lines.append("<style>")
+                html_lines.append("body { font-family: Arial, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; }")
+                html_lines.append("h1 { color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }")
+                html_lines.append("h2 { color: #3498db; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }")
+                html_lines.append("h3 { color: #2980b9; }")
+                html_lines.append("hr { border: 0; height: 1px; background: #eee; margin: 30px 0; }")
+                html_lines.append("</style></head><body>")
+                
+                # Very basic markdown to HTML conversion
+                in_list = False
+                for line in report_text.split('\n'):
+                    # Handle empty lines
+                    if not line.strip():
+                        if in_list:
+                            html_lines.append("</ul>")
+                            in_list = False
+                        html_lines.append("<br>")
+                        continue
+                    
+                    # Handle headings
+                    if line.startswith('# '):
+                        html_lines.append(f"<h1>{line[2:]}</h1>")
+                    elif line.startswith('## '):
+                        html_lines.append(f"<h2>{line[3:]}</h2>")
+                    elif line.startswith('### '):
+                        html_lines.append(f"<h3>{line[4:]}</h3>")
+                    # Handle lists
+                    elif line.startswith('* '):
+                        if not in_list:
+                            html_lines.append("<ul>")
+                            in_list = True
+                        html_lines.append(f"<li>{line[2:]}</li>")
+                    # Handle horizontal rules
+                    elif line.startswith('---'):
+                        if in_list:
+                            html_lines.append("</ul>")
+                            in_list = False
+                        html_lines.append("<hr>")
+                    # Handle normal text, preserving bold and italic
+                    else:
+                        if in_list:
+                            html_lines.append("</ul>")
+                            in_list = False
+                        
+                        # Replace ** with <strong> tags
+                        processed_line = ""
+                        bold_parts = line.split('**')
+                        for i, part in enumerate(bold_parts):
+                            if i % 2 == 1:  # Odd indices are bold
+                                processed_line += f"<strong>{part}</strong>"
+                            else:
+                                processed_line += part
+                        
+                        # Replace * with <em> tags (for italic)
+                        final_line = ""
+                        italic_parts = processed_line.split('*')
+                        if len(italic_parts) > 1:  # Only process if there are asterisks
+                            for i, part in enumerate(italic_parts):
+                                if i % 2 == 1:  # Odd indices are italic
+                                    final_line += f"<em>{part}</em>"
+                                else:
+                                    final_line += part
+                        else:
+                            final_line = processed_line
+                        
+                        html_lines.append(f"<p>{final_line}</p>")
+                
+                # Close any open lists and the HTML document
+                if in_list:
+                    html_lines.append("</ul>")
+                html_lines.append("</body></html>")
+                
+                # Write to file
+                with open(filename, 'w', encoding='utf-8') as f:
+                    f.write('\n'.join(html_lines))
+            
+            return True
+        except Exception as e:
+            print(f"HTML export error: {str(e)}")
+            return False, str(e)
+
+    @staticmethod
     def export_report_to_docx(report_text, filename):
         """
         Export markdown report to Word (.docx) file
