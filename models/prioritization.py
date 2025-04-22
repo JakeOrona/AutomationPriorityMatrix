@@ -357,22 +357,14 @@ class TestPrioritizationModel:
             
             # Check if test can be automated
             can_be_automated = True
-            if "can_be_automated" in scores and scores["can_be_automated"] == 1:  # Selected "No"
+            if "can_be_automated" in scores and scores["can_be_automated"] == 1:  # can_be_automated == "No"
                 can_be_automated = False
                 raw_score = 0
                 normalized_score = 0
                 priority_category = "Can't Automate"
             else:
                 # Calculate raw score
-                raw_score = sum(scores[factor] * self.factors[factor]["weight"] 
-                                for factor in scores if factor != "can_be_automated")
-
-                # Calculate max possible score
-                max_raw_score = sum(5 * self.factors[factor]["weight"] 
-                                    for factor in self.factors if factor != "can_be_automated")
-
-                # Calculate normalized score
-                normalized_score = (raw_score / max_raw_score) * 100 if max_raw_score > 0 else 0
+                raw_score, normalized_score = self.scoring.calculate_score(scores, {})
 
                 # Get priority category
                 priority_category = self.scoring.get_priority_category(normalized_score, can_be_automated)

@@ -445,6 +445,330 @@ class FileOperations:
         return report_text
     
     @staticmethod
+    def generate_markdown_report(tests, priority_tiers, model=None):
+        """
+        Generate markdown text for the prioritization report without exposing internal IDs
+        
+        Args:
+            tests (list): List of all test dictionaries
+            priority_tiers (dict): Dictionary with priority tier tests
+            model: The prioritization model
+            
+        Returns:
+            str: Formatted markdown report text
+        """
+        from datetime import datetime
+        
+        # Report header
+        header = f"# TEST AUTOMATION PRIORITY REPORT\n\n"
+        header += f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+        header += f"**Total Tests:** {len(tests)}\n"
+        
+        # Group tests by section
+        sections = {}
+        for test in tests:
+            section = test.get("section", "")
+            if section not in sections:
+                sections[section] = []
+            sections[section].append(test)
+        
+        if sections:
+            header += f"**Sections:** {len(sections)}\n"
+        
+        header += "\n---\n\n"
+        
+        report_text = header
+        
+        # Get the tiers
+        highest_priority = priority_tiers["highest"]
+        high_priority = priority_tiers["high"]
+        medium_priority = priority_tiers["medium"]
+        low_priority = priority_tiers["low"]
+        lowest_priority = priority_tiers["lowest"]
+        cant_automate = priority_tiers.get("cant_automate", [])
+
+        highest_threshold = priority_tiers["highest_threshold"]
+        high_threshold = priority_tiers["high_threshold"]
+        medium_threshold = priority_tiers["medium_threshold"]
+        low_threshold = priority_tiers["low_threshold"]
+        lowest_threshold = priority_tiers["lowest_threshold"]
+
+        # Highest priority section
+        report_text += f"## 🔴 HIGHEST PRIORITY TESTS (Score >= {highest_threshold:.1f})\n\n"
+        report_text += f"*Recommended for immediate automation*\n\n"
+        
+        if highest_priority:
+            for i, test in enumerate(highest_priority):
+                report_text += f"### {i+1}. {test['name']}\n"
+                report_text += f"**Score:** {test['total_score']:.1f}\n"
+                report_text += f"**Ticket:** {test['ticket_id']}\n"
+
+                # Add section if available
+                if test.get("section"):
+                    report_text += f"**Section:** {test['section']}\n"
+
+                # Add description if available
+                if test.get('description'):
+                    report_text += f"**Description:** {test['description']}\n"
+                
+                # Add score details with descriptions
+                if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                    report_text += f"**Factor Scores:**\n"
+                    for factor, score in test['scores'].items():
+                        if factor in model.factors and score in model.score_options.get(factor, {}):
+                            factor_name = model.factors[factor]["name"]
+                            score_description = model.score_options[factor][score]
+                            report_text += f"* **{factor_name}**: {score} - {score_description}\n"
+                
+                # Add yes/no answers if available
+                if test.get('yes_no_answers'):
+                    for key, answer in test['yes_no_answers'].items():
+                        report_text += f"* **{key}**: {answer}\n"
+                
+                report_text += "\n"
+        else:
+            report_text += "*No tests in this category*\n\n"
+        
+        report_text += "---\n\n"
+        
+        # High priority section
+        report_text += f"## 🟠 HIGH PRIORITY TESTS (Score {high_threshold:.1f} - {highest_threshold:.1f})\n\n"
+        report_text += f"*Recommended for second phase automation*\n\n"
+        
+        if high_priority:
+            for i, test in enumerate(high_priority):
+                report_text += f"### {i+1}. {test['name']}\n"
+                report_text += f"**Score:** {test['total_score']:.1f}\n"
+                report_text += f"**Ticket:** {test['ticket_id']}\n"
+
+                # Add section if available
+                if test.get("section"):
+                    report_text += f"**Section:** {test['section']}\n"
+
+                # Add description if available
+                if test.get('description'):
+                    report_text += f"**Description:** {test['description']}\n"
+                
+                # Add score details with descriptions
+                if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                    report_text += f"**Factor Scores:**\n"
+                    for factor, score in test['scores'].items():
+                        if factor in model.factors and score in model.score_options.get(factor, {}):
+                            factor_name = model.factors[factor]["name"]
+                            score_description = model.score_options[factor][score]
+                            report_text += f"* **{factor_name}**: {score} - {score_description}\n"
+                
+                # Add yes/no answers if available
+                if test.get('yes_no_answers'):
+                    for key, answer in test['yes_no_answers'].items():
+                        report_text += f"* **{key}**: {answer}\n"
+                
+                report_text += "\n"
+        else:
+            report_text += "*No tests in this category*\n\n"
+        
+        report_text += "---\n\n"
+        
+        # Medium priority section
+        report_text += f"## 🟡 MEDIUM PRIORITY TESTS (Score {medium_threshold:.1f} - {high_threshold:.1f})\n\n"
+        report_text += f"*Recommended for third phase automation*\n\n"
+        
+        if medium_priority:
+            for i, test in enumerate(medium_priority):
+                report_text += f"### {i+1}. {test['name']}\n"
+                report_text += f"**Score:** {test['total_score']:.1f}\n"
+                report_text += f"**Ticket:** {test['ticket_id']}\n"
+
+                # Add section if available
+                if test.get("section"):
+                    report_text += f"**Section:** {test['section']}\n"
+
+                # Add description if available
+                if test.get('description'):
+                    report_text += f"**Description:** {test['description']}\n"
+                
+                # Add score details with descriptions
+                if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                    report_text += f"**Factor Scores:**\n"
+                    for factor, score in test['scores'].items():
+                        if factor in model.factors and score in model.score_options.get(factor, {}):
+                            factor_name = model.factors[factor]["name"]
+                            score_description = model.score_options[factor][score]
+                            report_text += f"* **{factor_name}**: {score} - {score_description}\n"
+                
+                # Add yes/no answers if available
+                if test.get('yes_no_answers'):
+                    for key, answer in test['yes_no_answers'].items():
+                        report_text += f"* **{key}**: {answer}\n"
+                
+                report_text += "\n"
+        else:
+            report_text += "*No tests in this category*\n\n"
+        
+        report_text += "---\n\n"
+        
+        # Low priority section
+        report_text += f"## 🔵 LOW PRIORITY TESTS (Score {low_threshold:.1f} - {medium_threshold:.1f})\n\n"
+        report_text += f"*Consider for later phases or keep as manual tests*\n\n"
+        
+        if low_priority:
+            for i, test in enumerate(low_priority):
+                report_text += f"### {i+1}. {test['name']}\n"
+                report_text += f"**Score:** {test['total_score']:.1f}\n"
+                report_text += f"**Ticket:** {test['ticket_id']}\n"
+
+                # Add section if available
+                if test.get("section"):
+                    report_text += f"**Section:** {test['section']}\n"
+
+                # Add description if available
+                if test.get('description'):
+                    report_text += f"**Description:** {test['description']}\n"
+                
+                # Add score details with descriptions
+                if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                    report_text += f"**Factor Scores:**\n"
+                    for factor, score in test['scores'].items():
+                        if factor in model.factors and score in model.score_options.get(factor, {}):
+                            factor_name = model.factors[factor]["name"]
+                            score_description = model.score_options[factor][score]
+                            report_text += f"* **{factor_name}**: {score} - {score_description}\n"
+                
+                # Add yes/no answers if available
+                if test.get('yes_no_answers'):
+                    for key, answer in test['yes_no_answers'].items():
+                        report_text += f"* **{key}**: {answer}\n"
+                
+                report_text += "\n"
+        else:
+            report_text += "*No tests in this category*\n\n"
+        
+        report_text += "---\n\n"
+        
+        # Lowest priority section
+        report_text += f"## 🔷 LOWEST PRIORITY TESTS (Score <= {low_threshold:.1f})\n\n"
+        report_text += f"*Not Recommended for automation*\n\n"
+        
+        if lowest_priority:
+            for i, test in enumerate(lowest_priority):
+                report_text += f"### {i+1}. {test['name']}\n"
+                report_text += f"**Score:** {test['total_score']:.1f}\n"
+                report_text += f"**Ticket:** {test['ticket_id']}\n"
+
+                # Add section if available
+                if test.get("section"):
+                    report_text += f"**Section:** {test['section']}\n"
+
+                # Add description if available
+                if test.get('description'):
+                    report_text += f"**Description:** {test['description']}\n"
+                
+                # Add score details with descriptions
+                if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                    report_text += f"**Factor Scores:**\n"
+                    for factor, score in test['scores'].items():
+                        if factor in model.factors and score in model.score_options.get(factor, {}):
+                            factor_name = model.factors[factor]["name"]
+                            score_description = model.score_options[factor][score]
+                            report_text += f"* **{factor_name}**: {score} - {score_description}\n"
+                
+                # Add yes/no answers if available
+                if test.get('yes_no_answers'):
+                    for key, answer in test['yes_no_answers'].items():
+                        report_text += f"* **{key}**: {answer}\n"
+                
+                report_text += "\n"
+        else:
+            report_text += "*No tests in this category*\n\n"
+        
+        report_text += "---\n\n"
+        
+        # Can't Automate section
+        if cant_automate:
+            report_text += f"## ⚪ TESTS THAT CAN'T BE AUTOMATED\n\n"
+            report_text += f"*These tests have been identified as not possible to automate*\n\n"
+            
+            for i, test in enumerate(cant_automate):
+                report_text += f"### {i+1}. {test['name']}\n"
+                report_text += f"**Ticket:** {test['ticket_id']}\n"
+                
+                # Add section if available
+                if test.get("section"):
+                    report_text += f"**Section:** {test['section']}\n"
+                
+                # Add description if available
+                if test.get('description'):
+                    report_text += f"**Description:** {test['description']}\n"
+                
+                # Add score details with descriptions
+                if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+                    report_text += f"**Factor Scores:**\n"
+                    # First show the "Can it be automated?" factor to explain why it's in this category
+                    if "can_be_automated" in test['scores'] and test['scores']["can_be_automated"] == 1:
+                        factor_name = model.factors["can_be_automated"]["name"]
+                        score_description = model.score_options["can_be_automated"][1]
+                        report_text += f"* **{factor_name}**: 1 - {score_description}\n"
+                        
+                    # Then show other factors
+                    for factor, score in test['scores'].items():
+                        if factor != "can_be_automated" and factor in model.factors and score in model.score_options.get(factor, {}):
+                            factor_name = model.factors[factor]["name"]
+                            score_description = model.score_options[factor][score]
+                            report_text += f"* **{factor_name}**: {score} - {score_description}\n"
+                
+                # Add yes/no answers if available
+                if test.get('yes_no_answers'):
+                    for key, answer in test['yes_no_answers'].items():
+                        report_text += f"* **{key}**: {answer}\n"
+                
+                report_text += "\n"
+            
+            report_text += "---\n\n"
+        
+        # Add section breakdown report
+        if len(sections) > 1:  # Only add section breakdown if there's more than one section
+            report_text += "## SECTION BREAKDOWN\n\n"
+            
+            for section_name, section_tests in sorted(sections.items()):
+                # Skip empty section name
+                if not section_name:
+                    continue
+                    
+                # Count tests by priority in this section
+                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
+                for test in section_tests:
+                    priority = test.get("priority", "")
+                    if priority in priority_counts:
+                        priority_counts[priority] += 1
+                
+                report_text += f"### Section: {section_name}\n"
+                report_text += f"**Total Tests:** {len(section_tests)}\n"
+                report_text += "**Priority Distribution:**\n"
+                for priority, count in priority_counts.items():
+                    if count > 0:
+                        # Add emoji based on priority
+                        emoji = ""
+                        if priority == "Highest":
+                            emoji = "🔴"
+                        elif priority == "High":
+                            emoji = "🟠"
+                        elif priority == "Medium":
+                            emoji = "🟡"
+                        elif priority == "Low":
+                            emoji = "🔵"
+                        elif priority == "Lowest":
+                            emoji = "🔷"
+                        elif priority == "Can't Automate":
+                            emoji = "⚪"
+                        
+                        report_text += f"* {emoji} **{priority}**: {count} tests\n"
+                report_text += "\n"
+            
+            report_text += "---\n\n"
+        
+        return report_text
+    
+    @staticmethod
     def generate_scoring_guide_text(factors, score_options):
         """
         Generate text for the scoring guide
