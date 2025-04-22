@@ -1,5 +1,5 @@
 """
-text_report.py - Updated TextReportView to support tabbed view with both text and markdown
+text_report.py - TextReportView to support tabbed view with both text and markdown
 """
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
@@ -19,20 +19,6 @@ class TextReportView(BaseReportView):
             model: The prioritization model
         """
         super().__init__(parent, model, "Test Automation Priority Report")
-    
-    def create_report_content(self):
-        """
-        Text-based prioritization report view with tabs for text and markdown format
-        """
-        def __init__(self, parent, model):
-            """
-            Initialize the text report view
-            
-            Args:
-                parent: The parent window
-                model: The prioritization model
-            """
-            super().__init__(parent, model, "Test Automation Priority Report")
     
     def create_report_content(self):
         """Create the text report content with tabs for different formats"""
@@ -296,12 +282,6 @@ class TextReportView(BaseReportView):
         elif tab_text == "Markdown":
             self.parent.clipboard_append(self.markdown_report)
             message = "Markdown report copied to clipboard"
-        elif tab_text == "HTML":
-            self.parent.clipboard_append(self.html_report)
-            message = "HTML report copied to clipboard"
-        elif tab_text == "Word":
-            self.parent.clipboard_append(self.word_report)
-            message = "Word report copied to clipboard"
         else:
             message = "No valid tab selected"
         
