@@ -29,7 +29,7 @@ class TextReportView(BaseReportView):
         self.report_text = FileOperations.generate_report_text(self.model.tests, priority_tiers, self.model)
         
         # Generate markdown report
-        self.markdown_report = FileOperations.generate_markdown_report(self.model.tests, priority_tiers, self.model)
+        self.markdown_report = FileOperations.generate_enhanced_markdown_report(self.model.tests, priority_tiers, self.model)
         
         # Create notebook with tabs
         self.notebook = ttk.Notebook(self.main_frame)

@@ -769,6 +769,265 @@ class FileOperations:
         return report_text
     
     @staticmethod
+    def generate_enhanced_markdown_report(tests, priority_tiers, model=None):
+        """
+        Generate enhanced markdown text for the prioritization report with better HTML compatibility
+        
+        Args:
+            tests (list): List of all test dictionaries
+            priority_tiers (dict): Dictionary with priority tier tests
+            model: The prioritization model
+                
+        Returns:
+            str: Formatted markdown report text
+        """
+        from datetime import datetime
+        
+        # Report header
+        header = f"# TEST AUTOMATION PRIORITY REPORT\n\n"
+        header += f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+        header += f"**Total Tests:** {len(tests)}\n"
+        
+        # Group tests by section
+        sections = {}
+        for test in tests:
+            section = test.get("section", "")
+            if section not in sections:
+                sections[section] = []
+            sections[section].append(test)
+        
+        if sections:
+            header += f"**Sections:** {len(sections)}\n"
+        
+        header += "\n---\n\n"
+        
+        # Add priority distribution summary
+        highest_count = len(priority_tiers["highest"])
+        high_count = len(priority_tiers["high"])
+        medium_count = len(priority_tiers["medium"])
+        low_count = len(priority_tiers["low"])
+        lowest_count = len(priority_tiers["lowest"])
+        cant_automate_count = len(priority_tiers.get("cant_automate", []))
+        
+        summary = "## Priority Distribution Summary\n\n"
+        summary += "<div class='summary'>\n"
+        summary += "<div class='summary-grid'>\n"
+        summary += f"<div class='summary-item highest'><div class='summary-count'>{highest_count}</div><div class='summary-label'>Highest</div></div>\n"
+        summary += f"<div class='summary-item high'><div class='summary-count'>{high_count}</div><div class='summary-label'>High</div></div>\n"
+        summary += f"<div class='summary-item medium'><div class='summary-count'>{medium_count}</div><div class='summary-label'>Medium</div></div>\n"
+        summary += f"<div class='summary-item low'><div class='summary-count'>{low_count}</div><div class='summary-label'>Low</div></div>\n"
+        summary += f"<div class='summary-item lowest'><div class='summary-count'>{lowest_count}</div><div class='summary-label'>Lowest</div></div>\n"
+        summary += f"<div class='summary-item cant-automate'><div class='summary-count'>{cant_automate_count}</div><div class='summary-label'>Can't Automate</div></div>\n"
+        summary += "</div>\n</div>\n\n"
+        
+        report_text = header + summary
+        
+        # Get the tiers
+        highest_priority = priority_tiers["highest"]
+        high_priority = priority_tiers["high"]
+        medium_priority = priority_tiers["medium"]
+        low_priority = priority_tiers["low"]
+        lowest_priority = priority_tiers["lowest"]
+        cant_automate = priority_tiers.get("cant_automate", [])
+
+        highest_threshold = priority_tiers["highest_threshold"]
+        high_threshold = priority_tiers["high_threshold"]
+        medium_threshold = priority_tiers["medium_threshold"]
+        low_threshold = priority_tiers["low_threshold"]
+        lowest_threshold = priority_tiers["lowest_threshold"]
+
+        # Highest priority section
+        report_text += f"## <div class='section-header section-highest'>🔴 HIGHEST PRIORITY TESTS (Score >= {highest_threshold:.1f})</div>\n\n"
+        report_text += f"*Recommended for immediate automation*\n\n"
+        
+        if highest_priority:
+            for i, test in enumerate(highest_priority):
+                report_text += FileOperations.generate_test_card_markdown(test, i+1, "highest", model)
+        else:
+            report_text += "*No tests in this category*\n\n"
+        
+        report_text += "---\n\n"
+        
+        # High priority section
+        report_text += f"## <div class='section-header section-high'>🟠 HIGH PRIORITY TESTS (Score {high_threshold:.1f} - {highest_threshold:.1f})</div>\n\n"
+        report_text += f"*Recommended for second phase automation*\n\n"
+        
+        if high_priority:
+            for i, test in enumerate(high_priority):
+                report_text += FileOperations.generate_test_card_markdown(test, i+1, "high", model)
+        else:
+            report_text += "*No tests in this category*\n\n"
+        
+        report_text += "---\n\n"
+        
+        # Medium priority section
+        report_text += f"## <div class='section-header section-medium'>🟡 MEDIUM PRIORITY TESTS (Score {medium_threshold:.1f} - {high_threshold:.1f})</div>\n\n"
+        report_text += f"*Recommended for third phase automation*\n\n"
+        
+        if medium_priority:
+            for i, test in enumerate(medium_priority):
+                report_text += FileOperations.generate_test_card_markdown(test, i+1, "medium", model)
+        else:
+            report_text += "*No tests in this category*\n\n"
+        
+        report_text += "---\n\n"
+        
+        # Low priority section
+        report_text += f"## <div class='section-header section-low'>🔵 LOW PRIORITY TESTS (Score {low_threshold:.1f} - {medium_threshold:.1f})</div>\n\n"
+        report_text += f"*Consider for later phases or keep as manual tests*\n\n"
+        
+        if low_priority:
+            for i, test in enumerate(low_priority):
+                report_text += FileOperations.generate_test_card_markdown(test, i+1, "low", model)
+        else:
+            report_text += "*No tests in this category*\n\n"
+        
+        report_text += "---\n\n"
+        
+        # Lowest priority section
+        report_text += f"## <div class='section-header section-lowest'>🔷 LOWEST PRIORITY TESTS (Score <= {low_threshold:.1f})</div>\n\n"
+        report_text += f"*Not Recommended for automation*\n\n"
+        
+        if lowest_priority:
+            for i, test in enumerate(lowest_priority):
+                report_text += FileOperations.generate_test_card_markdown(test, i+1, "lowest", model)
+        else:
+            report_text += "*No tests in this category*\n\n"
+        
+        report_text += "---\n\n"
+        
+        # Can't Automate section
+        if cant_automate:
+            report_text += f"## <div class='section-header section-cant-automate'>⚪ TESTS THAT CAN'T BE AUTOMATED</div>\n\n"
+            report_text += f"*These tests have been identified as not possible to automate*\n\n"
+            
+            for i, test in enumerate(cant_automate):
+                report_text += FileOperations.generate_test_card_markdown(test, i+1, "cant-automate", model)
+            
+            report_text += "---\n\n"
+        
+        # Add section breakdown report
+        if len(sections) > 1:  # Only add section breakdown if there's more than one section
+            report_text += "## SECTION BREAKDOWN\n\n"
+            
+            for section_name, section_tests in sorted(sections.items()):
+                # Skip empty section name
+                if not section_name:
+                    continue
+                    
+                # Count tests by priority in this section
+                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
+                for test in section_tests:
+                    priority = test.get("priority", "")
+                    if priority in priority_counts:
+                        priority_counts[priority] += 1
+                
+                report_text += f"<div class='breakdown-item'>\n"
+                report_text += f"<div class='breakdown-title'>Section: {section_name}</div>\n"
+                report_text += f"<p><strong>Total Tests:</strong> {len(section_tests)}</p>\n"
+                report_text += "<div class='breakdown-stats'>\n"
+                
+                # Add emoji based on priority
+                for priority, count in priority_counts.items():
+                    if count > 0:
+                        # Convert priority name to lowercase for CSS class
+                        class_name = priority.lower().replace("'", "").replace(" ", "-")
+                        
+                        # Add emoji based on priority
+                        emoji = ""
+                        if priority == "Highest":
+                            emoji = "🔴"
+                        elif priority == "High":
+                            emoji = "🟠"
+                        elif priority == "Medium":
+                            emoji = "🟡"
+                        elif priority == "Low":
+                            emoji = "🔵"
+                        elif priority == "Lowest":
+                            emoji = "🔷"
+                        elif priority == "Can't Automate":
+                            emoji = "⚪"
+                        
+                        report_text += f"<span class='stat-pill {class_name}'>{emoji} {priority}: {count} tests</span>\n"
+                
+                report_text += "</div>\n</div>\n\n"
+        
+        return report_text
+
+    def generate_test_card_markdown(test, index, priority_class, model=None):
+        """
+        Generate markdown for a test card with enhanced HTML styling
+        
+        Args:
+            test (dict): Test dictionary
+            index (int): Index/rank of the test
+            priority_class (str): CSS class for priority styling
+            model: The prioritization model for factor descriptions
+        
+        Returns:
+            str: Markdown for the test card
+        """
+        # Start card
+        card = f"<div class='test-card'>\n"
+        
+        # Header with test name and score
+        card += f"<div class='test-header'>\n"
+        card += f"<h3 class='test-name'>{index}. {test['name']}</h3>\n"
+        card += f"<span class='score-badge priority-{priority_class}'>{test['total_score']:.1f}</span>\n"
+        card += f"</div>\n"
+        
+        # Meta information
+        card += f"<div class='test-meta'>\n"
+        card += f"<span class='meta-item ticket'>{test.get('ticket_id', 'N/A')}</span>\n"
+        if test.get("section"):
+            card += f"<span class='meta-item section'>{test['section']}</span>\n"
+        card += f"</div>\n"
+        
+        # Description if available
+        if test.get('description'):
+            card += f"<div class='description'>{test['description']}</div>\n"
+        
+        # Factor scores
+        if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+            card += f"<div class='factors'>\n"
+            
+            # Show the "Can it be automated?" factor first if in "Can't Automate" category
+            if test['priority'] == "Can't Automate" and "can_be_automated" in test['scores']:
+                factor_key = "can_be_automated"
+                factor_name = model.factors[factor_key]["name"]
+                score = test['scores'][factor_key]
+                score_description = model.score_options[factor_key][score]
+                
+                card += f"<div class='factor-item'>\n"
+                card += f"<span class='factor-name'>{factor_name}:</span>\n"
+                card += f"<span class='factor-score'>{score}</span>\n"
+                card += f"<span class='factor-description'>- {score_description}</span>\n"
+                card += f"</div>\n"
+            
+            # Show other factors
+            for factor_key, score in test['scores'].items():
+                # Skip the can_be_automated factor if already shown or if test can't be automated
+                if factor_key == "can_be_automated" and (test['priority'] == "Can't Automate"):
+                    continue
+                    
+                if factor_key in model.factors and score in model.score_options.get(factor_key, {}):
+                    factor_name = model.factors[factor_key]["name"]
+                    score_description = model.score_options[factor_key][score]
+                    
+                    card += f"<div class='factor-item'>\n"
+                    card += f"<span class='factor-name'>{factor_name}:</span>\n"
+                    card += f"<span class='factor-score'>{score}</span>\n"
+                    card += f"<span class='factor-description'>- {score_description}</span>\n"
+                    card += f"</div>\n"
+            
+            card += f"</div>\n"
+        
+        # Close card
+        card += f"</div>\n\n"
+        
+        return card
+    
+    @staticmethod
     def generate_scoring_guide_text(factors, score_options):
         """
         Generate text for the scoring guide
@@ -866,26 +1125,99 @@ class FileOperations:
                 has_markdown = False
                 
             if has_markdown:
-                # Convert markdown to HTML using the markdown library
-                html_content = markdown.markdown(report_text)
+                # Configure markdown extensions for better HTML output
+                markdown_extensions = [
+                    'tables',           # Support for tables
+                    'fenced_code',      # Support for fenced code blocks
+                    'nl2br',            # Convert newlines to <br> tags
+                    'sane_lists'        # Better list handling
+                ]
                 
-                # Add some basic styling
+                # Convert markdown to HTML using the markdown library with extensions
+                html_content = markdown.markdown(report_text, extensions=markdown_extensions)
+                
+                # Add CSS for improved styling
                 styled_html = f"""<!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
         <title>Test Automation Priority Report</title>
         <style>
-            body {{ font-family: Arial, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; }}
-            h1 {{ color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 10px; }}
-            h2 {{ color: #3498db; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }}
-            h3 {{ color: #2980b9; }}
-            hr {{ border: 0; height: 1px; background: #eee; margin: 30px 0; }}
-            ul {{ margin-left: 20px; }}
-            li {{ margin-bottom: 5px; }}
-            code {{ background: #f8f8f8; padding: 2px 4px; border-radius: 4px; }}
-            strong {{ color: #333; }}
-            em {{ color: #444; }}
+            body {{ 
+                font-family: Arial, sans-serif; 
+                line-height: 1.6; 
+                max-width: 950px; 
+                margin: 0 auto; 
+                padding: 20px; 
+                color: #333;
+            }}
+            h1 {{ 
+                color: #2c3e50; 
+                border-bottom: 2px solid #eee; 
+                padding-bottom: 10px; 
+                font-size: 24px;
+            }}
+            h2 {{ 
+                color: #3498db; 
+                margin-top: 30px; 
+                border-top: 1px solid #eee; 
+                padding-top: 20px; 
+                font-size: 20px;
+            }}
+            h3 {{ 
+                color: #2980b9; 
+                font-size: 16px;
+                margin-top: 20px;
+            }}
+            hr {{ 
+                border: 0; 
+                height: 1px; 
+                background: #eee; 
+                margin: 30px 0; 
+            }}
+            ul {{ 
+                margin-left: 20px; 
+                padding-left: 20px;
+            }}
+            li {{ 
+                margin-bottom: 5px; 
+            }}
+            code {{ 
+                background: #f8f8f8; 
+                padding: 2px 4px; 
+                border-radius: 4px; 
+            }}
+            strong {{ 
+                color: #333; 
+                font-weight: bold;
+            }}
+            em {{ 
+                color: #444; 
+                font-style: italic;
+            }}
+            p {{ 
+                margin: 10px 0; 
+            }}
+            table {{
+                border-collapse: collapse;
+                width: 100%;
+                margin: 15px 0;
+            }}
+            th, td {{
+                padding: 8px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }}
+            th {{
+                background-color: #f2f2f2;
+            }}
+            /* Priority color styling */
+            .highest {{ color: #D50000; }}
+            .high {{ color: #FF6D00; }}
+            .medium {{ color: #FFD600; }}
+            .low {{ color: #00B0FF; }}
+            .lowest {{ color: #18FFFF; }}
+            .cant-automate {{ color: #9E9E9E; }}
         </style>
     </head>
     <body>
@@ -893,11 +1225,21 @@ class FileOperations:
     </body>
     </html>"""
                 
+                # Add priority colors to headers
+                styled_html = styled_html.replace('>🔴 HIGHEST PRIORITY TESTS', ' class="highest">🔴 HIGHEST PRIORITY TESTS')
+                styled_html = styled_html.replace('>🟠 HIGH PRIORITY TESTS', ' class="high">🟠 HIGH PRIORITY TESTS')
+                styled_html = styled_html.replace('>🟡 MEDIUM PRIORITY TESTS', ' class="medium">🟡 MEDIUM PRIORITY TESTS')
+                styled_html = styled_html.replace('>🔵 LOW PRIORITY TESTS', ' class="low">🔵 LOW PRIORITY TESTS')
+                styled_html = styled_html.replace('>🔷 LOWEST PRIORITY TESTS', ' class="lowest">🔷 LOWEST PRIORITY TESTS')
+                styled_html = styled_html.replace('>⚪ TESTS THAT CAN\'T BE AUTOMATED', ' class="cant-automate">⚪ TESTS THAT CAN\'T BE AUTOMATED')
+                
                 # Write to file
                 with open(filename, 'w', encoding='utf-8') as f:
                     f.write(styled_html)
+                    
+                return True
             else:
-                # Fallback to basic HTML conversion
+                # Fallback to basic HTML conversion if markdown module is not available
                 html_lines = []
                 html_lines.append("<!DOCTYPE html>")
                 html_lines.append("<html><head><meta charset='UTF-8'>")
@@ -908,9 +1250,17 @@ class FileOperations:
                 html_lines.append("h2 { color: #3498db; margin-top: 30px; border-top: 1px solid #eee; padding-top: 20px; }")
                 html_lines.append("h3 { color: #2980b9; }")
                 html_lines.append("hr { border: 0; height: 1px; background: #eee; margin: 30px 0; }")
+                html_lines.append("ul { margin-left: 20px; padding-left: 20px; }")
+                html_lines.append("li { margin-bottom: 5px; }")
+                html_lines.append(".highest { color: #D50000; }")
+                html_lines.append(".high { color: #FF6D00; }")
+                html_lines.append(".medium { color: #FFD600; }")
+                html_lines.append(".low { color: #00B0FF; }")
+                html_lines.append(".lowest { color: #18FFFF; }")
+                html_lines.append(".cant-automate { color: #9E9E9E; }")
                 html_lines.append("</style></head><body>")
                 
-                # Very basic markdown to HTML conversion
+                # Very basic markdown to HTML conversion with improved handling of priority colors
                 in_list = False
                 for line in report_text.split('\n'):
                     # Handle empty lines
@@ -921,12 +1271,43 @@ class FileOperations:
                         html_lines.append("<br>")
                         continue
                     
-                    # Handle headings
+                    # Handle headings with priority colors
                     if line.startswith('# '):
+                        if in_list:
+                            html_lines.append("</ul>")
+                            in_list = False
                         html_lines.append(f"<h1>{line[2:]}</h1>")
                     elif line.startswith('## '):
-                        html_lines.append(f"<h2>{line[3:]}</h2>")
+                        if in_list:
+                            html_lines.append("</ul>")
+                            in_list = False
+                        
+                        # Add appropriate class based on priority level
+                        heading_text = line[3:]
+                        class_name = ""
+                        
+                        if "🔴 HIGHEST PRIORITY" in heading_text:
+                            class_name = "highest"
+                        elif "🟠 HIGH PRIORITY" in heading_text:
+                            class_name = "high"
+                        elif "🟡 MEDIUM PRIORITY" in heading_text:
+                            class_name = "medium"
+                        elif "🔵 LOW PRIORITY" in heading_text:
+                            class_name = "low"
+                        elif "🔷 LOWEST PRIORITY" in heading_text:
+                            class_name = "lowest"
+                        elif "⚪ TESTS THAT CAN'T BE AUTOMATED" in heading_text:
+                            class_name = "cant-automate"
+                        
+                        if class_name:
+                            html_lines.append(f'<h2 class="{class_name}">{heading_text}</h2>')
+                        else:
+                            html_lines.append(f"<h2>{heading_text}</h2>")
+                            
                     elif line.startswith('### '):
+                        if in_list:
+                            html_lines.append("</ul>")
+                            in_list = False
                         html_lines.append(f"<h3>{line[4:]}</h3>")
                     # Handle lists
                     elif line.startswith('* '):
@@ -977,11 +1358,11 @@ class FileOperations:
                 # Write to file
                 with open(filename, 'w', encoding='utf-8') as f:
                     f.write('\n'.join(html_lines))
-            
-            return True
+                
+                return True
         except Exception as e:
             print(f"HTML export error: {str(e)}")
-            return False, str(e)
+            return False
 
     @staticmethod
     def export_report_to_docx(report_text, filename):
