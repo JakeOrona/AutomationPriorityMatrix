@@ -62,41 +62,6 @@ class TextReportView(BaseReportView):
         # Make text widget read-only
         self.text_widget.configure(state="disabled")
         
-        # Create tab for HTML preview
-        html_frame = ttk.Frame(self.notebook)
-        self.notebook.add(html_frame, text="HTML Preview")
-        
-        # Create HTML preview using a temporary file and a button to open in browser
-        html_preview_frame = ttk.Frame(html_frame, padding=10)
-        html_preview_frame.pack(fill=tk.BOTH, expand=True)
-        
-        # Add info and preview button
-        preview_info = ttk.Label(
-            html_preview_frame, 
-            text="HTML preview is available in your default web browser.\nClick the button below to open the report.",
-            justify=tk.CENTER
-        )
-        preview_info.pack(pady=20)
-        
-        # Create a temporary HTML file
-        self.temp_html_file = self.create_temp_html_preview()
-        
-        # Add preview button
-        ttk.Button(
-            html_preview_frame, 
-            text="Open HTML Preview in Browser",
-            command=self.open_html_preview
-        ).pack(pady=10)
-
-        # Add note about browser preview
-        preview_note = ttk.Label(
-            html_preview_frame,
-            text="Note: The HTML preview will open in your default web browser.\nThis provides the most accurate representation of the exported HTML report.",
-            justify=tk.CENTER,
-            font=("", 9, "italic")
-        )
-        preview_note.pack(pady=20)
-        
         # Create an export options frame
         export_frame = ttk.LabelFrame(self.button_frame, text="Export Options")
         export_frame.pack(side=tk.LEFT, padx=1, pady=1, fill=tk.X)
