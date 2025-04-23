@@ -57,6 +57,7 @@ This application helps QA teams decide which manual tests to automate first by c
 - tkinter (usually included with Python)
 - matplotlib (for graphical reports)
 - pandas (optional, for enhanced CSV handling)
+- docx (docx priority report export)
 
 ## Installation
 
@@ -66,10 +67,15 @@ This application helps QA teams decide which manual tests to automate first by c
    - Linux users: Install tkinter if not included (`sudo apt-get install python3-tk` for Ubuntu)
 
 2. Open a command prompt/terminal and install required dependencies:
+   Windows users:
    ```bash
-   pip install matplotlib pandas
+   pip install matplotlib pandas docx
    ```
-
+   Mac users:
+   ```zsh
+   pip3 install matplotlib pandas docx
+   ```
+   
 3. Download this repository:
    - Click the green "Code" button above and select "Download ZIP"
    - Extract the ZIP file to a folder of your choice
