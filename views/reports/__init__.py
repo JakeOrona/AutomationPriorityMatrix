@@ -66,3 +66,9 @@ class BaseReportView:
             self.parent.destroy()
             return False
         return True
+
+from views.reports.text_report import TextReportView
+from views.reports.chart_report import ChartReportView
+from views.reports.html_report import HtmlReportView
+
+__all__ = ['BaseReportView', 'TextReportView', 'ChartReportView', 'HtmlReportView']

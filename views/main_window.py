@@ -63,7 +63,8 @@ class MainWindow:
         
         # Reports menu
         report_menu = tk.Menu(menubar, tearoff=0)
-        report_menu.add_command(label="Priority Report", command=self.show_priority_report)
+        report_menu.add_command(label="Text Report", command=self.show_text_report)
+        report_menu.add_command(label="HTML Report", command=self.show_html_report)
         report_menu.add_command(label="Graphical Report", command=self.show_graphical_report)
         menubar.add_cascade(label="Reports", menu=report_menu)
         
@@ -173,10 +174,16 @@ class MainWindow:
         
         messagebox.showinfo("Import Successful", f"{count} tests imported from {filename}")
     
-    def show_priority_report(self):
-        """Show the prioritization report"""
+    def show_text_report(self):
+        """Show the text report"""
         report_window = tk.Toplevel(self.root)
         TextReportView(report_window, self.model)
+
+    def show_html_report(self):
+        """Show HTML report"""
+        report_window = tk.Toplevel(self.root)
+        from views.reports.html_report import HtmlReportView
+        HtmlReportView(report_window, self.model)
     
     def show_graphical_report(self):
         """Show graphical reports"""
