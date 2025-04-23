@@ -112,7 +112,7 @@ class HTMLReportGenerator(BaseReportGenerator):
                 </div>
                 <div class="card-body">
                     <div>Recommended for immediate automation</div>
-                    <div class="card-threshold">Score: ≥ {highest_threshold}</div>
+                    <div class="card-threshold">Score: ≥ {highest_threshold:.2f}</div>
                 </div>
             </div>
             
@@ -123,7 +123,7 @@ class HTMLReportGenerator(BaseReportGenerator):
                 </div>
                 <div class="card-body">
                     <div>Recommended for second phase</div>
-                    <div class="card-threshold">Score: {high_threshold} - {highest_threshold - 0.1}</div>
+                    <div class="card-threshold">Score: {high_threshold:.2f} - {highest_threshold - 0.1:.2f}</div>
                 </div>
             </div>
             
@@ -134,7 +134,7 @@ class HTMLReportGenerator(BaseReportGenerator):
                 </div>
                 <div class="card-body">
                     <div>Recommended for third phase</div>
-                    <div class="card-threshold">Score: {medium_threshold} - {high_threshold - 0.1}</div>
+                    <div class="card-threshold">Score: {medium_threshold:.2f} - {high_threshold - 0.1:.2f}</div>
                 </div>
             </div>
             
@@ -145,7 +145,7 @@ class HTMLReportGenerator(BaseReportGenerator):
                 </div>
                 <div class="card-body">
                     <div>Consider for later phases</div>
-                    <div class="card-threshold">Score: {low_threshold} - {medium_threshold - 0.1}</div>
+                    <div class="card-threshold">Score: {low_threshold:.2f} - {medium_threshold - 0.1:.2f}</div>
                 </div>
             </div>
             
@@ -156,7 +156,7 @@ class HTMLReportGenerator(BaseReportGenerator):
                 </div>
                 <div class="card-body">
                     <div>Not recommended for automation</div>
-                    <div class="card-threshold">Score: < {low_threshold}</div>
+                    <div class="card-threshold">Score: < {low_threshold:.2f}</div>
                 </div>
             </div>
             
@@ -174,11 +174,11 @@ class HTMLReportGenerator(BaseReportGenerator):
     """
         # Add test sections by priority tier
         priority_sections = [
-            ("Highest Priority Tests", priority_tiers["highest"], "highest", f"≥ {highest_threshold}", "Recommended for immediate automation"),
-            ("High Priority Tests", priority_tiers["high"], "high", f"{high_threshold} - {highest_threshold - 0.1}", "Recommended for second phase automation"),
-            ("Medium Priority Tests", priority_tiers["medium"], "medium", f"{medium_threshold} - {high_threshold - 0.1}", "Recommended for third phase automation"),
-            ("Low Priority Tests", priority_tiers["low"], "low", f"{low_threshold} - {medium_threshold - 0.1}", "Consider for later phases or keep as manual tests"),
-            ("Lowest Priority Tests", priority_tiers["lowest"], "lowest", f"< {low_threshold}", "Not recommended for automation")
+            ("Highest Priority Tests", priority_tiers["highest"], "highest", f"≥ {highest_threshold:.2f}", "Recommended for immediate automation"),
+            ("High Priority Tests", priority_tiers["high"], "high", f"{high_threshold:.2f} - {highest_threshold - 0.1:.2f}", "Recommended for second phase automation"),
+            ("Medium Priority Tests", priority_tiers["medium"], "medium", f"{medium_threshold:.2f} - {high_threshold - 0.1:.2f}", "Recommended for third phase automation"),
+            ("Low Priority Tests", priority_tiers["low"], "low", f"{low_threshold:.2f} - {medium_threshold - 0.1:.2f}", "Consider for later phases or keep as manual tests"),
+            ("Lowest Priority Tests", priority_tiers["lowest"], "lowest", f"< {low_threshold:.2f}", "Not recommended for automation")
         ]
         
         for title, tests_list, css_class, score_range, description in priority_sections:
