@@ -79,11 +79,12 @@ class TextReportView(BaseReportView):
             command=self.export_html_report
         ).pack(side=tk.LEFT, padx=5, pady=5)
         
-        ttk.Button(
+        # Commented out Word export button due to bugs in the Word export function
+        """ttk.Button(
             export_frame, 
             text="Word (.docx)", 
             command=self.export_word_report
-        ).pack(side=tk.LEFT, padx=5, pady=5)
+        ).pack(side=tk.LEFT, padx=5, pady=5)"""
         
         # Add copy to clipboard button
         ttk.Button(

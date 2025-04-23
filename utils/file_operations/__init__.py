@@ -1,9 +1,14 @@
-# file_operations/__init__.py
 """
 file_operations package - Handles file import/export and report generation
 """
 from .csv_handler import CSVHandler
-from .report_generators import TextReportGenerator, MarkdownReportGenerator, HTMLReportGenerator, DocxReportGenerator
+from .report_generators import (
+    BaseReportGenerator,
+    TextReportGenerator, 
+    MarkdownReportGenerator, 
+    HTMLReportGenerator, 
+    DocxReportGenerator
+)
 
 # For backward compatibility
 class FileOperations:

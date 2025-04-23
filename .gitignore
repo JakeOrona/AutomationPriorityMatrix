@@ -2,9 +2,11 @@
 /models/__pycache__/
 /utils/*.pyc
 /utils/__pycache__/
+/utils/file_operations/*.pyc
+/utils/file_operations/__pycache__/
+/utils/file_operations/report_generators/*.pyc
+/utils/file_operations/report_generators/__pycache__/
 /views/*.pyc
 /views/__pycache__/
-/views/reports/*.pyc
-/views/reports/__pycache__/
 /views/reports/*.pyc
 /views/reports/__pycache__/

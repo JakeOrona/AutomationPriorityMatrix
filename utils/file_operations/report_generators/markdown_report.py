@@ -1,12 +1,16 @@
-import os
-import webbrowser
-from tkinter import messagebox, filedialog 
-from utils.file_operations import FileOperations
-from utils.file_operations.report_generators.base_report import BaseReportGenerator
-from utils.file_operations.report_generators.html_report import HTMLReportGenerator
+"""
+markdown_report.py - Markdown report generator for test prioritization
+"""
+from datetime import datetime
+from .base_report import BaseReportGenerator
+
+class MarkdownReportGenerator(BaseReportGenerator):
+    """
+    Handles markdown report generation for the test prioritization application
+    """
 
     @staticmethod
-    def generate_markdown_report(tests, priority_tiers, model=None):
+    def generate_report(tests, priority_tiers, model=None):
         """
         Generate markdown text for the prioritization report
         
@@ -18,20 +22,13 @@ from utils.file_operations.report_generators.html_report import HTMLReportGenera
         Returns:
             str: Formatted markdown report text
         """
-        from datetime import datetime
-        
         # Report header
         header = f"# TEST AUTOMATION PRIORITY REPORT\n\n"
         header += f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
         header += f"**Total Tests:** {len(tests)}\n"
         
         # Group tests by section
-        sections = {}
-        for test in tests:
-            section = test.get("section", "")
-            if section not in sections:
-                sections[section] = []
-            sections[section].append(test)
+        sections = BaseReportGenerator.group_tests_by_section(tests)
         
         if sections:
             header += f"**Sections:** {len(sections)}\n"
@@ -328,11 +325,11 @@ from utils.file_operations.report_generators.html_report import HTMLReportGenera
             report_text += "---\n\n"
         
         return report_text
-    
+
     @staticmethod
-    def generate_enhanced_markdown_report(tests, priority_tiers, model=None):
+    def generate_enhanced_report(tests, priority_tiers, model=None):
         """
-        Generate enhanced markdown text for the prioritization report with better HTML compatibility
+        Generate enhanced markdown text with better HTML compatibility
         
         Args:
             tests (list): List of all test dictionaries
@@ -340,22 +337,15 @@ from utils.file_operations.report_generators.html_report import HTMLReportGenera
             model: The prioritization model
                 
         Returns:
-            str: Formatted markdown report text
+            str: Formatted markdown report text with HTML enhancements
         """
-        from datetime import datetime
-        
         # Report header
         header = f"# TEST AUTOMATION PRIORITY REPORT\n\n"
         header += f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
         header += f"**Total Tests:** {len(tests)}\n"
         
         # Group tests by section
-        sections = {}
-        for test in tests:
-            section = test.get("section", "")
-            if section not in sections:
-                sections[section] = []
-            sections[section].append(test)
+        sections = BaseReportGenerator.group_tests_by_section(tests)
         
         if sections:
             header += f"**Sections:** {len(sections)}\n"
@@ -403,7 +393,7 @@ from utils.file_operations.report_generators.html_report import HTMLReportGenera
         
         if highest_priority:
             for i, test in enumerate(highest_priority):
-                report_text += FileOperations.generate_test_card_markdown(test, i+1, "highest", model)
+                report_text += MarkdownReportGenerator.generate_test_card(test, i+1, "highest", model)
         else:
             report_text += "*No tests in this category*\n\n"
         
@@ -415,7 +405,7 @@ from utils.file_operations.report_generators.html_report import HTMLReportGenera
         
         if high_priority:
             for i, test in enumerate(high_priority):
-                report_text += FileOperations.generate_test_card_markdown(test, i+1, "high", model)
+                report_text += MarkdownReportGenerator.generate_test_card(test, i+1, "high", model)
         else:
             report_text += "*No tests in this category*\n\n"
         
@@ -427,7 +417,7 @@ from utils.file_operations.report_generators.html_report import HTMLReportGenera
         
         if medium_priority:
             for i, test in enumerate(medium_priority):
-                report_text += FileOperations.generate_test_card_markdown(test, i+1, "medium", model)
+                report_text += MarkdownReportGenerator.generate_test_card(test, i+1, "medium", model)
         else:
             report_text += "*No tests in this category*\n\n"
         
@@ -439,7 +429,7 @@ from utils.file_operations.report_generators.html_report import HTMLReportGenera
         
         if low_priority:
             for i, test in enumerate(low_priority):
-                report_text += FileOperations.generate_test_card_markdown(test, i+1, "low", model)
+                report_text += MarkdownReportGenerator.generate_test_card(test, i+1, "low", model)
         else:
             report_text += "*No tests in this category*\n\n"
         
@@ -451,7 +441,7 @@ from utils.file_operations.report_generators.html_report import HTMLReportGenera
         
         if lowest_priority:
             for i, test in enumerate(lowest_priority):
-                report_text += FileOperations.generate_test_card_markdown(test, i+1, "lowest", model)
+                report_text += MarkdownReportGenerator.generate_test_card(test, i+1, "lowest", model)
         else:
             report_text += "*No tests in this category*\n\n"
         
@@ -463,7 +453,7 @@ from utils.file_operations.report_generators.html_report import HTMLReportGenera
             report_text += f"*These tests have been identified as not possible to automate*\n\n"
             
             for i, test in enumerate(cant_automate):
-                report_text += FileOperations.generate_test_card_markdown(test, i+1, "cant-automate", model)
+                report_text += MarkdownReportGenerator.generate_test_card(test, i+1, "cant-automate", model)
             
             report_text += "---\n\n"
         
@@ -514,3 +504,59 @@ from utils.file_operations.report_generators.html_report import HTMLReportGenera
                 report_text += "</div>\n</div>\n\n"
         
         return report_text
+
+    @staticmethod
+    def generate_test_card(test, index, css_class, model):
+        """
+        Generate a markdown card for a test with HTML classes
+        
+        Args:
+            test (dict): Test dictionary
+            index (int): Index/rank of the test
+            css_class (str): CSS class for styling
+            model: The prioritization model
+            
+        Returns:
+            str: Markdown text for the test card
+        """
+        card = f"<div class='test-card {css_class}'>\n"
+        card += f"### {index}. {test['name']}\n"
+        card += f"**Score:** {test['total_score']:.1f}\n"
+        card += f"**Ticket:** {test['ticket_id']}\n"
+
+        # Add section if available
+        if test.get("section"):
+            card += f"**Section:** {test['section']}\n"
+
+        # Add description if available
+        if test.get('description'):
+            card += f"**Description:** {test['description']}\n"
+        
+        # Add score details with descriptions
+        if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
+            card += f"**Factor Scores:**\n"
+            
+            # Show "Can it be automated?" factor first for Can't Automate tests
+            if test['priority'] == "Can't Automate" and "can_be_automated" in test['scores'] and test['scores']["can_be_automated"] == 1:
+                factor_name = model.factors["can_be_automated"]["name"]
+                score_description = model.score_options["can_be_automated"][1]
+                card += f"* **{factor_name}**: 1 - {score_description}\n"
+            
+            # Show other factors
+            for factor, score in test['scores'].items():
+                # Skip can_be_automated if we already showed it
+                if factor == "can_be_automated" and test['priority'] == "Can't Automate":
+                    continue
+                    
+                if factor in model.factors and score in model.score_options.get(factor, {}):
+                    factor_name = model.factors[factor]["name"]
+                    score_description = model.score_options[factor][score]
+                    card += f"* **{factor_name}**: {score} - {score_description}\n"
+        
+        # Add yes/no answers if available
+        if test.get('yes_no_answers'):
+            for key, answer in test['yes_no_answers'].items():
+                card += f"* **{key}**: {answer}\n"
+        
+        card += "</div>\n\n"
+        return card
