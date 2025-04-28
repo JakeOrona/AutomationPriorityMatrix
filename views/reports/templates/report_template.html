@@ -418,7 +418,7 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <h1>Enhanced Test Automation Report</h1>
+                <h1>Test Automation Report</h1>
                 <div class="timestamp">Generated: {{timestamp}}</div>
             </div>
             <div class="header-meta">
@@ -487,12 +487,12 @@
             
             <div class="summary-card cant-automate">
                 <div class="card-header">
-                    <span>Can't Automate</span>
+                    <span>Won't Automate</span>
                     <span class="card-count">{{cant_automate_count}}</span>
                 </div>
                 <div class="card-body">
-                    <div>Not possible to automate</div>
-                    <div class="card-threshold">Manual testing only</div>
+                    <div>Won't automate</div>
+                    <div class="card-threshold">Manual testing only for now</div>
                 </div>
             </div>
         </div>
@@ -511,7 +511,7 @@
                 <button class="tab-button" data-tab="medium-priority">Medium Priority</button>
                 <button class="tab-button" data-tab="low-priority">Low Priority</button>
                 <button class="tab-button" data-tab="lowest-priority">Lowest Priority</button>
-                <button class="tab-button" data-tab="cant-automate">Can't Automate</button>
+                <button class="tab-button" data-tab="cant-automate">Won't Automate</button>
             </div>
             
             <!-- Dashboard Tab -->
@@ -605,12 +605,11 @@
                     <table class="test-table" id="test-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>Ticket ID</th>
                                 <th>Name</th>
                                 <th>Section</th>
                                 <th>Priority</th>
                                 <th>Score</th>
-                                <th>Ticket ID</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -673,8 +672,8 @@
             
             <!-- Can't Automate Tab -->
             <div class="tab-content" id="cant-automate">
-                <h2>Tests That Can't Be Automated</h2>
-                <p>Tests identified as not possible to automate.</p>
+                <h2>Tests That Won't Be Automated</h2>
+                <p>Tests identified as not worth automating right now.</p>
                 
                 <div class="test-cards">
                     {{cant_automate_cards}}
@@ -743,7 +742,7 @@
             }
             
             // Initialize the table and filters
-            const testData = JSON.parse('{{test_data_json}}');
+            const testData = JSON.parse(`{{test_data_json}}`);
             
             // Populate the table with test data
             function populateTable() {
@@ -758,9 +757,9 @@
                     const row = document.createElement('tr');
                     
                     // Create table cells
-                    const idCell = document.createElement('td');
-                    idCell.textContent = test.id;
-                    row.appendChild(idCell);
+                    const ticketCell = document.createElement('td');
+                    ticketCell.textContent = test.ticket_id || '';
+                    row.appendChild(ticketCell);
                     
                     const nameCell = document.createElement('td');
                     nameCell.textContent = test.name;
@@ -778,10 +777,6 @@
                     const scoreCell = document.createElement('td');
                     scoreCell.textContent = test.total_score;
                     row.appendChild(scoreCell);
-                    
-                    const ticketCell = document.createElement('td');
-                    ticketCell.textContent = test.ticket_id || '';
-                    row.appendChild(ticketCell);
                     
                     tableBody.appendChild(row);
                 });

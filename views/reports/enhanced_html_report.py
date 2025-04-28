@@ -274,7 +274,7 @@ pip install matplotlib
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enhanced Test Automation Report</title>
+    <title>Test Automation Priority Report</title>
     <style>
         body { font-family: sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
@@ -283,7 +283,7 @@ pip install matplotlib
 </head>
 <body>
     <div class="container">
-        <h1>Enhanced Test Automation Report</h1>
+        <h1>Test Automation Priority Report</h1>
         <p>Generated: {{timestamp}}</p>
         <p>Total Tests: {{total_tests}}</p>
         
