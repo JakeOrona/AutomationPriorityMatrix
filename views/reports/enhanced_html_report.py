@@ -33,7 +33,7 @@ class EnhancedHtmlReportView(BaseReportView):
         # Check if matplotlib is available
         self.matplotlib_available = ChartUtils.is_matplotlib_available()
         
-        super().__init__(parent, model, "Test Automation Report")
+        super().__init__(parent, model, "Test Automation Priority Report")
         
     def __del__(self):
         """Clean up temporary files when the object is destroyed"""
