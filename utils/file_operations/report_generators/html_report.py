@@ -3,12 +3,42 @@ html_report.py - HTML report generator for test prioritization
 """
 from datetime import datetime
 from .base_report import BaseReportGenerator
+import base64
+import io
 
 class HTMLReportGenerator(BaseReportGenerator):
     """
     Handles HTML report generation for the test prioritization application
     """
 
+    @staticmethod
+    def _figure_to_base64(figure):
+        """
+        Convert a matplotlib figure to a base64 encoded image
+        
+        Args:
+            figure: Matplotlib figure object
+            
+        Returns:
+            str: Base64 encoded image string
+        """
+        if figure is None:
+            return None
+        
+        # Save figure to a bytes buffer
+        buf = io.BytesIO()
+        figure.savefig(buf, format='png', bbox_inches='tight', dpi=300)
+        buf.seek(0)
+        
+        # Encode the image to base64
+        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+        
+        # Close the figure to free up memory
+        import matplotlib.pyplot as plt
+        plt.close(figure)
+        
+        return img_base64
+    
     @staticmethod
     def export_report(tests, priority_tiers, model, filename):
         """

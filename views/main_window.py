@@ -6,8 +6,6 @@ from tkinter import ttk, messagebox, filedialog
 from views.test_form import TestForm
 from views.test_list import TestList
 from views.test_details import TestDetailsView
-from views.reports.text_report import TextReportView
-from views.reports.chart_report import ChartReportView
 from utils.file_operations import FileOperations
 
 class MainWindow:
@@ -63,8 +61,9 @@ class MainWindow:
         
         # Reports menu
         report_menu = tk.Menu(menubar, tearoff=0)
+        report_menu.add_command(label="Full Report - HTML", command=self.show_full_report)
         report_menu.add_command(label="Text Report", command=self.show_text_report)
-        report_menu.add_command(label="HTML Report", command=self.show_html_report)
+        # report_menu.add_command(label="HTML Report", command=self.show_html_report)
         report_menu.add_command(label="Graphical Report", command=self.show_graphical_report)
         menubar.add_cascade(label="Reports", menu=report_menu)
         
@@ -174,20 +173,28 @@ class MainWindow:
         
         messagebox.showinfo("Import Successful", f"{count} tests imported from {filename}")
     
+    def show_full_report(self):
+        """Show the full HTML report"""
+        report_window = tk.Toplevel(self.root)
+        from views.reports.enhanced_html_report import EnhancedHtmlReportView
+        EnhancedHtmlReportView(report_window, self.model)
+    
     def show_text_report(self):
         """Show the text report"""
         report_window = tk.Toplevel(self.root)
+        from views.reports.text_report import TextReportView
         TextReportView(report_window, self.model)
 
-    def show_html_report(self):
-        """Show HTML report"""
-        report_window = tk.Toplevel(self.root)
-        from views.reports.html_report import HtmlReportView
-        HtmlReportView(report_window, self.model)
+    # def show_html_report(self):
+    #     """Show HTML report"""
+    #     report_window = tk.Toplevel(self.root)
+    #     from views.reports.html_report import HtmlReportView
+    #     HtmlReportView(report_window, self.model)
     
     def show_graphical_report(self):
         """Show graphical reports"""
         report_window = tk.Toplevel(self.root)
+        from views.reports.chart_report import ChartReportView
         ChartReportView(report_window, self.model)
     
     def show_about(self):
