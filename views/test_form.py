@@ -141,7 +141,7 @@ class TestForm:
             # Add info label explaining the importance of this factor
             info_label = ttk.Label(
                 basic_info_frame, 
-                text="If a test cannot be automated, it will be categorized as 'Can't Automate' and will receive a priority score of 0.",
+                text="If a test cannot be automated, it will be categorized as 'Won't Automate' and will receive a priority score of 0.",
                 font=("", 9, "italic")
             )
             info_label.grid(row=info_row, column=0, columnspan=2, sticky=tk.W, pady=5, padx=5)

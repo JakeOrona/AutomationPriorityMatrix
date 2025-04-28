@@ -294,7 +294,7 @@ pip install matplotlib
             <li>Medium Priority: {{medium_count}}</li>
             <li>Low Priority: {{low_count}}</li>
             <li>Lowest Priority: {{lowest_count}}</li>
-            <li>Can't Automate: {{cant_automate_count}}</li>
+            <li>Won't Automate: {{wont_automate_count}}</li>
         </ul>
         
         {{priority_chart}}
@@ -359,7 +359,7 @@ pip install matplotlib
             "medium_count": len(priority_tiers["medium"]),
             "low_count": len(priority_tiers["low"]),
             "lowest_count": len(priority_tiers["lowest"]),
-            "cant_automate_count": len(priority_tiers.get("cant_automate", []))
+            "wont_automate_count": len(priority_tiers.get("wont_automate", []))
         }
         
         # Get thresholds with 1 decimal place formatting
@@ -378,7 +378,7 @@ pip install matplotlib
             "medium_priority_cards": self.generate_test_cards_html(priority_tiers["medium"], "medium"),
             "low_priority_cards": self.generate_test_cards_html(priority_tiers["low"], "low"),
             "lowest_priority_cards": self.generate_test_cards_html(priority_tiers["lowest"], "lowest"),
-            "cant_automate_cards": self.generate_test_cards_html(priority_tiers.get("cant_automate", []), "cant-automate")
+            "wont_automate_cards": self.generate_test_cards_html(priority_tiers.get("wont_automate", []), "wont-automate")
         }
         
         # Prepare JSON data for JavaScript
@@ -517,8 +517,8 @@ pip install matplotlib
             
             # Add factors
             if hasattr(self.model, 'factors') and hasattr(self.model, 'score_options'):
-                # Show the "Can it be automated?" factor first if in "Can't Automate" category
-                if test['priority'] == "Can't Automate" and "can_be_automated" in test['scores']:
+                # Show the "Can it be automated?" factor first if in "Won't Automate" category
+                if test['priority'] == "Won't Automate" and "can_be_automated" in test['scores']:
                     factor_key = "can_be_automated"
                     factor_name = self.model.factors[factor_key]["name"]
                     score = test['scores'][factor_key]
@@ -534,8 +534,8 @@ pip install matplotlib
                 
                 # Add other factors
                 for factor_key, score in test['scores'].items():
-                    # Skip the can_be_automated factor if already shown or if test can't be automated
-                    if factor_key == "can_be_automated" and (test['priority'] == "Can't Automate"):
+                    # Skip the can_be_automated factor if already shown or if test won't be automated
+                    if factor_key == "can_be_automated" and (test['priority'] == "Won't Automate"):
                         continue
                         
                     if factor_key in self.model.factors and score in self.model.score_options.get(factor_key, {}):
@@ -585,7 +585,7 @@ pip install matplotlib
             })
         
         # Sort by priority order
-        priority_order = {"Highest": 0, "High": 1, "Medium": 2, "Low": 3, "Lowest": 4, "Can't Automate": 5}
+        priority_order = {"Highest": 0, "High": 1, "Medium": 2, "Low": 3, "Lowest": 4, "Won't Automate": 5}
         sorted_data = sorted(test_data, key=lambda x: (priority_order.get(x['priority'], 999), -x['total_score']))
         
         return json.dumps(sorted_data)

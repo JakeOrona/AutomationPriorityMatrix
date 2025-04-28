@@ -60,7 +60,7 @@ class TestPrioritizationModel:
             can_be_automated = False
             raw_score = 0
             normalized_score = 0
-            priority = "Can't Automate"
+            priority = "Won't Automate"
         else:
             # Calculate scores
             raw_score, normalized_score = self.scoring.calculate_score(scores, yes_no_answers)
@@ -112,7 +112,7 @@ class TestPrioritizationModel:
             can_be_automated = False
             raw_score = 0
             normalized_score = 0
-            priority_category = "Can't Automate"
+            priority_category = "Won't Automate"
         else:
             # Calculate scores with the new values
             raw_score, normalized_score = self.scoring.calculate_score(scores, yes_no_answers)
@@ -233,7 +233,7 @@ class TestPrioritizationModel:
             filtered_tests = self.tests
             
         # Then sort by priority category
-        priority_order = {"Highest": 0, "High": 1, "Medium": 2, "Low": 3, "Lowest": 4, "Can't Automate": 5}
+        priority_order = {"Highest": 0, "High": 1, "Medium": 2, "Low": 3, "Lowest": 4, "Won't Automate": 5}
         return sorted(filtered_tests, key=lambda x: (priority_order.get(x["priority"], 999), -x["total_score"]))
     
     def get_tests_by_section(self, section):
@@ -272,7 +272,7 @@ class TestPrioritizationModel:
                 "medium": [],
                 "low": [],
                 "lowest": [],
-                "cant_automate": [],
+                "wont_automate": [],
                 "high_threshold": 0,
                 "medium_threshold": 0,
                 "low_threshold": 0,
@@ -299,7 +299,7 @@ class TestPrioritizationModel:
         medium_priority = [t for t in sorted_tests if t["priority"] == "Medium"]
         low_priority = [t for t in sorted_tests if t["priority"] == "Low"]
         lowest_priority = [t for t in sorted_tests if t["priority"] == "Lowest"]
-        cant_automate = [t for t in sorted_tests if t["priority"] == "Can't Automate"]
+        wont_automate = [t for t in sorted_tests if t["priority"] == "Won't Automate"]
         
         return {
             "highest": highest_priority,  
@@ -307,7 +307,7 @@ class TestPrioritizationModel:
             "medium": medium_priority,
             "low": low_priority,
             "lowest": lowest_priority,
-            "cant_automate": cant_automate,
+            "wont_automate": wont_automate,
             "lowest_threshold": lowest_threshold,
             "low_threshold": low_threshold,
             "medium_threshold": medium_threshold,
@@ -361,7 +361,7 @@ class TestPrioritizationModel:
                 can_be_automated = False
                 raw_score = 0
                 normalized_score = 0
-                priority_category = "Can't Automate"
+                priority_category = "Won't Automate"
             else:
                 # Calculate raw score
                 raw_score, normalized_score = self.scoring.calculate_score(scores, {})

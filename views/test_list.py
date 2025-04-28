@@ -32,7 +32,7 @@ class TestList:
             "Medium": "#FFD600",   # Gold
             "Low": "#00FFFF",     # Cyan
             "Lowest": "#18FFFF",    # light blue
-            "Can't Automate": "#9E9E9E"  # Gray
+            "Won't Automate": "#9E9E9E"  # Gray
         }
         
         # Track the current section filter
@@ -133,8 +133,8 @@ class TestList:
             test_name = test.get("name")
             priority = test.get("priority")
             
-            # For "Can't Automate" tests, show 0 score
-            score_display = "0" if priority == "Can't Automate" else test["total_score"]
+            # For "Won't Automate" tests, show 0 score
+            score_display = "0" if priority == "Won't Automate" else test["total_score"]
             
             # Insert item with appropriate tag for coloring
             item_id = self.tree.insert(

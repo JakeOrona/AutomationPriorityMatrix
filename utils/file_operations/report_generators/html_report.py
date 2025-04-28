@@ -61,7 +61,7 @@ class HTMLReportGenerator(BaseReportGenerator):
                 "Medium": len(priority_tiers["medium"]),
                 "Low": len(priority_tiers["low"]),
                 "Lowest": len(priority_tiers["lowest"]),
-                "Can't Automate": len(priority_tiers.get("cant_automate", []))
+                "Won't Automate": len(priority_tiers.get("wont_automate", []))
             }
             
             # Get thresholds
@@ -190,14 +190,14 @@ class HTMLReportGenerator(BaseReportGenerator):
                 </div>
             </div>
             
-            <div class="summary-card cant-automate">
+            <div class="summary-card wont-automate">
                 <div class="card-header">
-                    <span>Can't Automate</span>
-                    <span class="card-count">{priority_counts["Can't Automate"]}</span>
+                    <span>Won't Automate</span>
+                    <span class="card-count">{priority_counts["Won't Automate"]}</span>
                 </div>
                 <div class="card-body">
-                    <div>Not possible to automate</div>
-                    <div class="card-threshold">Manual testing only</div>
+                    <div>Will not be automated</div>
+                    <div class="card-threshold">Manual testing only right now</div>
                 </div>
             </div>
         </div>
@@ -236,22 +236,22 @@ class HTMLReportGenerator(BaseReportGenerator):
         </section>
     """
         
-        # Add "Can't Automate" section if there are tests that can't be automated
-        if "cant_automate" in priority_tiers and priority_tiers["cant_automate"]:
+        # Add "Won't Automate" section if there are tests that won't be automated
+        if "wont_automate" in priority_tiers and priority_tiers["wont_automate"]:
             html += """
-        <!-- Can't Automate Section -->
+        <!-- Won't Automate Section -->
         <section>
-            <div class="section-header section-cant-automate">
+            <div class="section-header section-wont-automate">
                 <span class="section-icon"></span>
-                <h2>Tests That Can't Be Automated</h2>
+                <h2>Tests That Won't Be Automated</h2>
             </div>
-            <div class="section-description">These tests have been identified as not possible to automate</div>
+            <div class="section-description">These tests have been identified as not willing to automate</div>
             
             <div class="test-cards">
     """
             
-            for i, test in enumerate(priority_tiers["cant_automate"]):
-                html += HTMLReportGenerator.generate_test_card(test, i+1, "cant-automate", model)
+            for i, test in enumerate(priority_tiers["wont_automate"]):
+                html += HTMLReportGenerator.generate_test_card(test, i+1, "wont-automate", model)
             
             html += """
             </div>
@@ -281,7 +281,7 @@ class HTMLReportGenerator(BaseReportGenerator):
             --medium-color: #fbc02d;
             --low-color: #29b6f6;
             --lowest-color: #4fc3f7;
-            --cant-automate-color: #9e9e9e;
+            --wont-automate-color: #9e9e9e;
             --bg-color: #f5f5f5;
             --card-bg: #ffffff;
             --text-color: #333333;
@@ -366,7 +366,7 @@ class HTMLReportGenerator(BaseReportGenerator):
         .medium .card-header { background-color: var(--medium-color); }
         .low .card-header { background-color: var(--low-color); }
         .lowest .card-header { background-color: var(--lowest-color); }
-        .cant-automate .card-header { background-color: var(--cant-automate-color); }
+        .wont-automate .card-header { background-color: var(--wont-automate-color); }
         
         .card-count {
             font-size: 24px;
@@ -413,7 +413,7 @@ class HTMLReportGenerator(BaseReportGenerator):
         .section-medium .section-icon { background-color: var(--medium-color); }
         .section-low .section-icon { background-color: var(--low-color); }
         .section-lowest .section-icon { background-color: var(--lowest-color); }
-        .section-cant-automate .section-icon { background-color: var(--cant-automate-color); }
+        .section-wont-automate .section-icon { background-color: var(--wont-automate-color); }
         
         .section-description {
             font-size: 14px;
@@ -470,7 +470,7 @@ class HTMLReportGenerator(BaseReportGenerator):
         .priority-medium .score-badge { background-color: var(--medium-color); }
         .priority-low .score-badge { background-color: var(--low-color); }
         .priority-lowest .score-badge { background-color: var(--lowest-color); }
-        .priority-cant-automate .score-badge { background-color: var(--cant-automate-color); }
+        .priority-won-automate .score-badge { background-color: var(--wont-automate-color); }
         
         .test-meta {
             display: flex;
@@ -611,8 +611,8 @@ class HTMLReportGenerator(BaseReportGenerator):
         
             # Add factors
             if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
-                # Show the "Can it be automated?" factor first if in "Can't Automate" category
-                if test['priority'] == "Can't Automate" and "can_be_automated" in test['scores']:
+                # Show the "Can it be automated?" factor first if in "Won't Automate" category
+                if test['priority'] == "Won't Automate" and "can_be_automated" in test['scores']:
                     factor_key = "can_be_automated"
                     factor_name = model.factors[factor_key]["name"]
                     score = test['scores'][factor_key]
@@ -628,8 +628,8 @@ class HTMLReportGenerator(BaseReportGenerator):
             
                 # Add other factors
                 for factor_key, score in test['scores'].items():
-                    # Skip the can_be_automated factor if already shown or if test can't be automated
-                    if factor_key == "can_be_automated" and (test['priority'] == "Can't Automate"):
+                    # Skip the can_be_automated factor if already shown or if test won't be automated
+                    if factor_key == "can_be_automated" and (test['priority'] == "Won't Automate"):
                         continue
                     
                     if factor_key in model.factors and score in model.score_options.get(factor_key, {}):
