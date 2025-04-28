@@ -43,7 +43,7 @@ class MarkdownReportGenerator(BaseReportGenerator):
         medium_priority = priority_tiers["medium"]
         low_priority = priority_tiers["low"]
         lowest_priority = priority_tiers["lowest"]
-        cant_automate = priority_tiers.get("cant_automate", [])
+        wont_automate = priority_tiers.get("wont_automate", [])
 
         highest_threshold = priority_tiers["highest_threshold"]
         high_threshold = priority_tiers["high_threshold"]
@@ -241,12 +241,12 @@ class MarkdownReportGenerator(BaseReportGenerator):
         
         report_text += "---\n\n"
         
-        # Can't Automate section
-        if cant_automate:
-            report_text += f"## ⚪ TESTS THAT CAN'T BE AUTOMATED\n\n"
-            report_text += f"*These tests have been identified as not possible to automate*\n\n"
+        # Won't Automate section
+        if wont_automate:
+            report_text += f"## ⚪ TESTS THAT WON'T BE AUTOMATED\n\n"
+            report_text += f"*These tests have been identified as not worth  automating yet*\n\n"
             
-            for i, test in enumerate(cant_automate):
+            for i, test in enumerate(wont_automate):
                 report_text += f"### {i+1}. {test['name']}\n"
                 report_text += f"**Ticket:** {test['ticket_id']}\n"
                 
@@ -293,7 +293,7 @@ class MarkdownReportGenerator(BaseReportGenerator):
                     continue
                     
                 # Count tests by priority in this section
-                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
+                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Won't Automate": 0}
                 for test in section_tests:
                     priority = test.get("priority", "")
                     if priority in priority_counts:
@@ -316,7 +316,7 @@ class MarkdownReportGenerator(BaseReportGenerator):
                             emoji = "🔵"
                         elif priority == "Lowest":
                             emoji = "🔷"
-                        elif priority == "Can't Automate":
+                        elif priority == "Won't Automate":
                             emoji = "⚪"
                         
                         report_text += f"* {emoji} **{priority}**: {count} tests\n"
@@ -358,7 +358,7 @@ class MarkdownReportGenerator(BaseReportGenerator):
         medium_count = len(priority_tiers["medium"])
         low_count = len(priority_tiers["low"])
         lowest_count = len(priority_tiers["lowest"])
-        cant_automate_count = len(priority_tiers.get("cant_automate", []))
+        wont_automate_count = len(priority_tiers.get("wont_automate", []))
         
         summary = "## Priority Distribution Summary\n\n"
         summary += "<div class='summary'>\n"
@@ -368,7 +368,7 @@ class MarkdownReportGenerator(BaseReportGenerator):
         summary += f"<div class='summary-item medium'><div class='summary-count'>{medium_count}</div><div class='summary-label'>Medium</div></div>\n"
         summary += f"<div class='summary-item low'><div class='summary-count'>{low_count}</div><div class='summary-label'>Low</div></div>\n"
         summary += f"<div class='summary-item lowest'><div class='summary-count'>{lowest_count}</div><div class='summary-label'>Lowest</div></div>\n"
-        summary += f"<div class='summary-item cant-automate'><div class='summary-count'>{cant_automate_count}</div><div class='summary-label'>Can't Automate</div></div>\n"
+        summary += f"<div class='summary-item wont-automate'><div class='summary-count'>{wont_automate_count}</div><div class='summary-label'>Won't Automate</div></div>\n"
         summary += "</div>\n</div>\n\n"
         
         report_text = header + summary
@@ -379,7 +379,7 @@ class MarkdownReportGenerator(BaseReportGenerator):
         medium_priority = priority_tiers["medium"]
         low_priority = priority_tiers["low"]
         lowest_priority = priority_tiers["lowest"]
-        cant_automate = priority_tiers.get("cant_automate", [])
+        wont_automate = priority_tiers.get("wont_automate", [])
 
         highest_threshold = priority_tiers["highest_threshold"]
         high_threshold = priority_tiers["high_threshold"]
@@ -447,13 +447,13 @@ class MarkdownReportGenerator(BaseReportGenerator):
         
         report_text += "---\n\n"
         
-        # Can't Automate section
-        if cant_automate:
-            report_text += f"## <div class='section-header section-cant-automate'>⚪ TESTS THAT CAN'T BE AUTOMATED</div>\n\n"
+        # Won't Automate section
+        if wont_automate:
+            report_text += f"## <div class='section-header section-wontt-automate'>⚪ TESTS THAT WON'T BE AUTOMATED</div>\n\n"
             report_text += f"*These tests have been identified as not possible to automate*\n\n"
             
-            for i, test in enumerate(cant_automate):
-                report_text += MarkdownReportGenerator.generate_test_card(test, i+1, "cant-automate", model)
+            for i, test in enumerate(wont_automate):
+                report_text += MarkdownReportGenerator.generate_test_card(test, i+1, "wont-automate", model)
             
             report_text += "---\n\n"
         
@@ -467,7 +467,7 @@ class MarkdownReportGenerator(BaseReportGenerator):
                     continue
                     
                 # Count tests by priority in this section
-                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
+                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Won't Automate": 0}
                 for test in section_tests:
                     priority = test.get("priority", "")
                     if priority in priority_counts:
@@ -496,7 +496,7 @@ class MarkdownReportGenerator(BaseReportGenerator):
                             emoji = "🔵"
                         elif priority == "Lowest":
                             emoji = "🔷"
-                        elif priority == "Can't Automate":
+                        elif priority == "Won't Automate":
                             emoji = "⚪"
                         
                         report_text += f"<span class='stat-pill {class_name}'>{emoji} {priority}: {count} tests</span>\n"
@@ -536,8 +536,8 @@ class MarkdownReportGenerator(BaseReportGenerator):
         if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
             card += f"**Factor Scores:**\n"
             
-            # Show "Can it be automated?" factor first for Can't Automate tests
-            if test['priority'] == "Can't Automate" and "can_be_automated" in test['scores'] and test['scores']["can_be_automated"] == 1:
+            # Show "Can it be automated?" factor first for Won't Automate tests
+            if test['priority'] == "Won't Automate" and "can_be_automated" in test['scores'] and test['scores']["can_be_automated"] == 1:
                 factor_name = model.factors["can_be_automated"]["name"]
                 score_description = model.score_options["can_be_automated"][1]
                 card += f"* **{factor_name}**: 1 - {score_description}\n"
@@ -545,7 +545,7 @@ class MarkdownReportGenerator(BaseReportGenerator):
             # Show other factors
             for factor, score in test['scores'].items():
                 # Skip can_be_automated if we already showed it
-                if factor == "can_be_automated" and test['priority'] == "Can't Automate":
+                if factor == "can_be_automated" and test['priority'] == "Won't Automate":
                     continue
                     
                 if factor in model.factors and score in model.score_options.get(factor, {}):

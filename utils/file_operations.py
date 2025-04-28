@@ -182,7 +182,7 @@ class FileOperations:
         medium_priority = priority_tiers["medium"]
         low_priority = priority_tiers["low"]
         lowest_priority = priority_tiers["lowest"]
-        cant_automate = priority_tiers.get("cant_automate", [])  # Get "Can't Automate" tests if available
+        wont_automate = priority_tiers.get("wont_automate", [])  # Get "Won't Automate" tests if available
 
         highest_threshold = priority_tiers["highest_threshold"]
         high_threshold = priority_tiers["high_threshold"]
@@ -374,13 +374,13 @@ class FileOperations:
         
         report_text += "\n"
         
-        # Can't Automate section
-        if cant_automate:
-            report_text += f"TESTS THAT CAN'T BE AUTOMATED:\n"
-            report_text += f"These tests have been identified as not possible to automate\n"
+        # Won't Automate section
+        if wont_automate:
+            report_text += f"TESTS THAT WON'T BE AUTOMATED:\n"
+            report_text += f"These tests have been identified as not willing to automate\n"
             report_text += "-" * 70 + "\n"
             
-            for i, test in enumerate(cant_automate):
+            for i, test in enumerate(wont_automate):
                 report_text += f"| {i+1}. {test['name']} (ID: {test['id']})\n"
                 
                 # Add section if available
@@ -428,7 +428,7 @@ class FileOperations:
                     continue
                     
                 # Count tests by priority in this section
-                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
+                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Won't Automate": 0}
                 for test in section_tests:
                     priority = test.get("priority", "")
                     if priority in priority_counts:
@@ -487,7 +487,7 @@ class FileOperations:
         medium_priority = priority_tiers["medium"]
         low_priority = priority_tiers["low"]
         lowest_priority = priority_tiers["lowest"]
-        cant_automate = priority_tiers.get("cant_automate", [])
+        wont_automate = priority_tiers.get("wont_automate", [])
 
         highest_threshold = priority_tiers["highest_threshold"]
         high_threshold = priority_tiers["high_threshold"]
@@ -685,12 +685,12 @@ class FileOperations:
         
         report_text += "---\n\n"
         
-        # Can't Automate section
-        if cant_automate:
-            report_text += f"## ⚪ TESTS THAT CAN'T BE AUTOMATED\n\n"
-            report_text += f"*These tests have been identified as not possible to automate*\n\n"
+        # Won't Automate section
+        if wont_automate:
+            report_text += f"## ⚪ TESTS THAT WON'T BE AUTOMATED\n\n"
+            report_text += f"*These tests have been identified as not willing to automate*\n\n"
             
-            for i, test in enumerate(cant_automate):
+            for i, test in enumerate(wont_automate):
                 report_text += f"### {i+1}. {test['name']}\n"
                 report_text += f"**Ticket:** {test['ticket_id']}\n"
                 
@@ -737,7 +737,7 @@ class FileOperations:
                     continue
                     
                 # Count tests by priority in this section
-                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
+                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Won't Automate": 0}
                 for test in section_tests:
                     priority = test.get("priority", "")
                     if priority in priority_counts:
@@ -760,7 +760,7 @@ class FileOperations:
                             emoji = "🔵"
                         elif priority == "Lowest":
                             emoji = "🔷"
-                        elif priority == "Can't Automate":
+                        elif priority == "Won't Automate":
                             emoji = "⚪"
                         
                         report_text += f"* {emoji} **{priority}**: {count} tests\n"
@@ -809,7 +809,7 @@ class FileOperations:
         medium_count = len(priority_tiers["medium"])
         low_count = len(priority_tiers["low"])
         lowest_count = len(priority_tiers["lowest"])
-        cant_automate_count = len(priority_tiers.get("cant_automate", []))
+        wont_automate_count = len(priority_tiers.get("wont_automate", []))
         
         summary = "## Priority Distribution Summary\n\n"
         summary += "<div class='summary'>\n"
@@ -819,7 +819,7 @@ class FileOperations:
         summary += f"<div class='summary-item medium'><div class='summary-count'>{medium_count}</div><div class='summary-label'>Medium</div></div>\n"
         summary += f"<div class='summary-item low'><div class='summary-count'>{low_count}</div><div class='summary-label'>Low</div></div>\n"
         summary += f"<div class='summary-item lowest'><div class='summary-count'>{lowest_count}</div><div class='summary-label'>Lowest</div></div>\n"
-        summary += f"<div class='summary-item cant-automate'><div class='summary-count'>{cant_automate_count}</div><div class='summary-label'>Can't Automate</div></div>\n"
+        summary += f"<div class='summary-item wont-automate'><div class='summary-count'>{wont_automate_count}</div><div class='summary-label'>Won't Automate</div></div>\n"
         summary += "</div>\n</div>\n\n"
         
         report_text = header + summary
@@ -830,7 +830,7 @@ class FileOperations:
         medium_priority = priority_tiers["medium"]
         low_priority = priority_tiers["low"]
         lowest_priority = priority_tiers["lowest"]
-        cant_automate = priority_tiers.get("cant_automate", [])
+        wont_automate = priority_tiers.get("wont_automate", [])
 
         highest_threshold = priority_tiers["highest_threshold"]
         high_threshold = priority_tiers["high_threshold"]
@@ -898,13 +898,13 @@ class FileOperations:
         
         report_text += "---\n\n"
         
-        # Can't Automate section
-        if cant_automate:
-            report_text += f"## <div class='section-header section-cant-automate'>⚪ TESTS THAT CAN'T BE AUTOMATED</div>\n\n"
-            report_text += f"*These tests have been identified as not possible to automate*\n\n"
+        # Won't Automate section
+        if wont_automate:
+            report_text += f"## <div class='section-header section-wont-automate'>⚪ TESTS THAT WON'T BE AUTOMATED</div>\n\n"
+            report_text += f"*These tests have been identified as not willing to automate*\n\n"
             
-            for i, test in enumerate(cant_automate):
-                report_text += FileOperations.generate_test_card_markdown(test, i+1, "cant-automate", model)
+            for i, test in enumerate(wont_automate):
+                report_text += FileOperations.generate_test_card_markdown(test, i+1, "wont-automate", model)
             
             report_text += "---\n\n"
         
@@ -918,7 +918,7 @@ class FileOperations:
                     continue
                     
                 # Count tests by priority in this section
-                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
+                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Won't Automate": 0}
                 for test in section_tests:
                     priority = test.get("priority", "")
                     if priority in priority_counts:
@@ -947,7 +947,7 @@ class FileOperations:
                             emoji = "🔵"
                         elif priority == "Lowest":
                             emoji = "🔷"
-                        elif priority == "Can't Automate":
+                        elif priority == "Won't Automate":
                             emoji = "⚪"
                         
                         report_text += f"<span class='stat-pill {class_name}'>{emoji} {priority}: {count} tests</span>\n"
@@ -980,7 +980,7 @@ class FileOperations:
                 "Medium": len(priority_tiers["medium"]),
                 "Low": len(priority_tiers["low"]),
                 "Lowest": len(priority_tiers["lowest"]),
-                "Can't Automate": len(priority_tiers.get("cant_automate", []))
+                "Won't Automate": len(priority_tiers.get("wont_automate", []))
             }
             
             # Get thresholds
@@ -1003,7 +1003,7 @@ class FileOperations:
                 --medium-color: #fbc02d;
                 --low-color: #29b6f6;
                 --lowest-color: #4fc3f7;
-                --cant-automate-color: #9e9e9e;
+                --wont-automate-color: #9e9e9e;
                 --bg-color: #f5f5f5;
                 --card-bg: #ffffff;
                 --text-color: #333333;
@@ -1088,7 +1088,7 @@ class FileOperations:
             .medium .card-header { background-color: var(--medium-color); }
             .low .card-header { background-color: var(--low-color); }
             .lowest .card-header { background-color: var(--lowest-color); }
-            .cant-automate .card-header { background-color: var(--cant-automate-color); }
+            .wont-automate .card-header { background-color: var(--wont-automate-color); }
             
             .card-count {
                 font-size: 24px;
@@ -1135,7 +1135,7 @@ class FileOperations:
             .section-medium .section-icon { background-color: var(--medium-color); }
             .section-low .section-icon { background-color: var(--low-color); }
             .section-lowest .section-icon { background-color: var(--lowest-color); }
-            .section-cant-automate .section-icon { background-color: var(--cant-automate-color); }
+            .section-wont-automate .section-icon { background-color: var(--wont-automate-color); }
             
             .section-description {
                 font-size: 14px;
@@ -1192,7 +1192,7 @@ class FileOperations:
             .priority-medium .score-badge { background-color: var(--medium-color); }
             .priority-low .score-badge { background-color: var(--low-color); }
             .priority-lowest .score-badge { background-color: var(--lowest-color); }
-            .priority-cant-automate .score-badge { background-color: var(--cant-automate-color); }
+            .priority-wont-automate .score-badge { background-color: var(--wont-automate-color); }
             
             .test-meta {
                 display: flex;
@@ -1360,13 +1360,13 @@ class FileOperations:
                     </div>
                 </div>
                 
-                <div class="summary-card cant-automate">
+                <div class="summary-card wont-automate">
                     <div class="card-header">
-                        <span>Can't Automate</span>
-                        <span class="card-count">""" + str(priority_counts["Can't Automate"]) + """</span>
+                        <span>Won't Automate</span>
+                        <span class="card-count">""" + str(priority_counts["Won't Automate"]) + """</span>
                     </div>
                     <div class="card-body">
-                        <div>Not possible to automate</div>
+                        <div>Not willing to automate</div>
                         <div class="card-threshold">Manual testing only</div>
                     </div>
                 </div>
@@ -1407,22 +1407,22 @@ class FileOperations:
             </section>
     """
             
-            # Add "Can't Automate" section if there are tests that can't be automated
-            if "cant_automate" in priority_tiers and priority_tiers["cant_automate"]:
+            # Add "Won't Automate" section if there are tests that won't be automated
+            if "wont_automate" in priority_tiers and priority_tiers["wont_automate"]:
                 html += """
-            <!-- Can't Automate Section -->
+            <!-- Won't Automate Section -->
             <section>
-                <div class="section-header section-cant-automate">
+                <div class="section-header section-wont-automate">
                     <span class="section-icon"></span>
-                    <h2>Tests That Can't Be Automated</h2>
+                    <h2>Tests That Won't Be Automated</h2>
                 </div>
-                <div class="section-description">These tests have been identified as not possible to automate</div>
+                <div class="section-description">These tests have been identified as not willing to automate</div>
                 
                 <div class="test-cards">
     """
                 
-                for i, test in enumerate(priority_tiers["cant_automate"]):
-                    html += FileOperations._generate_test_card_html(test, i+1, "cant-automate", model)
+                for i, test in enumerate(priority_tiers["wont_automate"]):
+                    html += FileOperations._generate_test_card_html(test, i+1, "wont-automate", model)
                 
                 html += """
                 </div>
@@ -1494,8 +1494,8 @@ class FileOperations:
             
             # Add factors
             if model and hasattr(model, 'factors') and hasattr(model, 'score_options'):
-                # Show the "Can it be automated?" factor first if in "Can't Automate" category
-                if test['priority'] == "Can't Automate" and "can_be_automated" in test['scores']:
+                # Show the "Can it be automated?" factor first if in "Won't Automate" category
+                if test['priority'] == "Won't Automate" and "can_be_automated" in test['scores']:
                     factor_key = "can_be_automated"
                     factor_name = model.factors[factor_key]["name"]
                     score = test['scores'][factor_key]
@@ -1511,8 +1511,8 @@ class FileOperations:
                 
                 # Add other factors
                 for factor_key, score in test['scores'].items():
-                    # Skip the can_be_automated factor if already shown or if test can't be automated
-                    if factor_key == "can_be_automated" and (test['priority'] == "Can't Automate"):
+                    # Skip the can_be_automated factor if already shown or if test won't be automated
+                    if factor_key == "can_be_automated" and (test['priority'] == "won't Automate"):
                         continue
                         
                     if factor_key in model.factors and score in model.score_options.get(factor_key, {}):
@@ -1591,7 +1591,7 @@ class FileOperations:
             guide += "If a test is marked as 'Cannot be automated' (selecting 'No' for the\n"
             guide += "'Can it be automated?' factor), it will automatically receive:\n"
             guide += "  - A score of 0\n"
-            guide += "  - Priority category of 'Can't Automate'\n"
+            guide += "  - Priority category of 'Won't Automate'\n"
             guide += "These tests are excluded from normal prioritization and shown separately.\n\n"
         
         return guide

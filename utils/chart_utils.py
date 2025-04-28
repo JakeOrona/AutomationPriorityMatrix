@@ -44,7 +44,7 @@ class ChartUtils:
         ax = fig.add_subplot(111)
         
         # Count tests by priority
-        priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
+        priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Won't Automate": 0}
         for test in tests:
             priority_counts[test["priority"]] += 1
         
@@ -89,8 +89,8 @@ class ChartUtils:
         fig = Figure(figsize=figure_size)
         ax = fig.add_subplot(111)
         
-        # Filter out "Can't Automate" tests which have a score of 0
-        scorable_tests = [test for test in tests if test["priority"] != "Can't Automate"]
+        # Filter out "Won't Automate" tests which have a score of 0
+        scorable_tests = [test for test in tests if test["priority"] != "Won't Automate"]
         
         # Get scores for histogram
         scores = [test["total_score"] for test in scorable_tests]
@@ -126,10 +126,10 @@ class ChartUtils:
                         label=f'Lowest Threshold ({lowest_threshold:.1f})')
             ax.legend()
             
-            # Add text about can't automate tests
-            cant_automate_count = len(tests) - len(scorable_tests)
-            if cant_automate_count > 0:
-                ax.text(0.5, 0.95, f'Note: {cant_automate_count} "Can\'t Automate" tests excluded',
+            # Add text about won't automate tests
+            wont_automate_count = len(tests) - len(scorable_tests)
+            if wont_automate_count > 0:
+                ax.text(0.5, 0.95, f'Note: {wont_automate_count} "Won\'t Automate" tests excluded',
                         horizontalalignment='center', verticalalignment='top',
                         transform=ax.transAxes, bbox=dict(facecolor='white', alpha=0.8))
         else:
@@ -161,8 +161,8 @@ class ChartUtils:
         fig = Figure(figsize=figure_size)
         ax = fig.add_subplot(111)
         
-        # Filter out "Can't Automate" tests
-        scorable_tests = [test for test in tests if test["priority"] != "Can't Automate"]
+        # Filter out "Won't Automate" tests
+        scorable_tests = [test for test in tests if test["priority"] != "Won't Automate"]
         
         if scorable_tests:
             # Calculate average scores for each factor
@@ -198,10 +198,10 @@ class ChartUtils:
             
             fig.tight_layout()  # Adjust layout for rotated labels
             
-            # Add text about can't automate tests
-            cant_automate_count = len(tests) - len(scorable_tests)
-            if cant_automate_count > 0:
-                ax.text(0.5, 0.95, f'Note: {cant_automate_count} "Can\'t Automate" tests excluded',
+            # Add text about won't automate tests
+            wont_automate_count = len(tests) - len(scorable_tests)
+            if wont_automate_count > 0:
+                ax.text(0.5, 0.95, f'Note: {wont_automate_count} "Won\'t Automate" tests excluded',
                         horizontalalignment='center', verticalalignment='top',
                         transform=ax.transAxes, bbox=dict(facecolor='white', alpha=0.8))
         else:
@@ -233,8 +233,8 @@ class ChartUtils:
         fig = Figure(figsize=figure_size)
         ax = fig.add_subplot(111)
         
-        # Filter out "Can't Automate" tests
-        scorable_tests = [test for test in tests if test["priority"] != "Can't Automate"]
+        # Filter out "Won't Automate" tests
+        scorable_tests = [test for test in tests if test["priority"] != "Won't Automate"]
         
         if scorable_tests:
             # Get sorted tests
@@ -283,10 +283,10 @@ class ChartUtils:
             
             fig.tight_layout()  # Adjust layout for long test names
             
-            # Add text about can't automate tests
-            cant_automate_count = len(tests) - len(scorable_tests)
-            if cant_automate_count > 0:
-                ax.text(0.5, 0.95, f'Note: {cant_automate_count} "Can\'t Automate" tests excluded',
+            # Add text about won't automate tests
+            wont_automate_count = len(tests) - len(scorable_tests)
+            if wont_automate_count > 0:
+                ax.text(0.5, 0.95, f'Note: {wont_automate_count} "Won\'t Automate" tests excluded',
                         horizontalalignment='center', verticalalignment='top',
                         transform=ax.transAxes, bbox=dict(facecolor='white', alpha=0.8))
         else:

@@ -47,7 +47,7 @@ class TextReportGenerator:
         medium_priority = priority_tiers["medium"]
         low_priority = priority_tiers["low"]
         lowest_priority = priority_tiers["lowest"]
-        cant_automate = priority_tiers.get("cant_automate", [])  # Get "Can't Automate" tests if available
+        wont_automate = priority_tiers.get("wont_automate", [])  # Get "Won't Automate" tests if available
 
         highest_threshold = priority_tiers["highest_threshold"]
         high_threshold = priority_tiers["high_threshold"]
@@ -234,13 +234,13 @@ class TextReportGenerator:
         report_text += "-" * 70 + "\n"
         report_text += "\n"
         
-        # Can't Automate section
-        if cant_automate:
-            report_text += f"TESTS THAT CAN'T BE AUTOMATED:\n"
-            report_text += f"These tests have been identified as not possible to automate\n"
+        # Won't Automate section
+        if wont_automate:
+            report_text += f"TESTS THAT WON'T BE AUTOMATED:\n"
+            report_text += f"These tests have been identified as not willing to automate\n"
             report_text += "-" * 70 + "\n"
             
-            for i, test in enumerate(cant_automate):
+            for i, test in enumerate(wont_automate):
                 report_text += f"| {i+1}. {test['name']} (ID: {test['id']})\n"
                 
                 # Add section if available
@@ -288,7 +288,7 @@ class TextReportGenerator:
                     continue
                     
                 # Count tests by priority in this section
-                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Can't Automate": 0}
+                priority_counts = {"Highest": 0, "High": 0, "Medium": 0, "Low": 0, "Lowest": 0, "Won't Automate": 0}
                 for test in section_tests:
                     priority = test.get("priority", "")
                     if priority in priority_counts:
@@ -375,10 +375,10 @@ class TextReportGenerator:
         if "can_be_automated" in factors:
             guide += "Special Case - Tests that cannot be automated:\n"
             guide += "-" * 50 + "\n"
-            guide += "If a test is marked as 'Cannot be automated' (selecting 'No' for the\n"
+            guide += "If a test is marked as 'Won't be automated' (selecting 'No' for the\n"
             guide += "'Can it be automated?' factor), it will automatically receive:\n"
             guide += "  - A score of 0\n"
-            guide += "  - Priority category of 'Can't Automate'\n"
+            guide += "  - Priority category of 'Won't Automate'\n"
             guide += "These tests are excluded from normal prioritization and shown separately.\n\n"
         
         return guide

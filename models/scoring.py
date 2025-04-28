@@ -114,11 +114,11 @@ class ScoringSystem:
             can_be_automated (bool): Indicates if the test can be automated
             
         Returns:
-            str: Priority category ('Highest', 'High', 'Medium', 'Low', 'Lowest' or 'Can't Automate')
+            str: Priority category ('Highest', 'High', 'Medium', 'Low', 'Lowest' or 'Won't Automate')
         """
-        # Special case for tests that cant be automated
+        # Special case for tests that wont be automated
         if not can_be_automated:
-            return "Can't Automate"
+            return "Won't Automate"
 
         # Define thresholds for categories
         if score >= 85:

@@ -151,10 +151,10 @@ class TestDetailsView:
                 )
                 row += 1
         
-        # If test is in "Can't Automate" category, show simplified view with reason
-        if self.test['priority'] == "Can't Automate":
-            # Show raw score as 0 and note that it can't be automated
-            ttk.Label(self.scrollable_frame, text=f"Raw Score: 0 (Test cannot be automated)", font=("", 12)).grid(
+        # If test is in "Won't Automate" category, show simplified view with reason
+        if self.test['priority'] == "Won't Automate":
+            # Show raw score as 0 and note that it Won't be automated
+            ttk.Label(self.scrollable_frame, text=f"Raw Score: 0 (Test won't be automated)", font=("", 12)).grid(
                 row=row, column=0, columnspan=2, sticky=tk.W, pady=5
             )
             row += 1
@@ -176,7 +176,7 @@ class TestDetailsView:
                 font=("", 12, "bold")
             )
             
-            # Set color for "Can't Automate"
+            # Set color for "Won't Automate"
             priority_value.configure(foreground="gray")
             
             priority_value.pack(side=tk.LEFT)
@@ -208,7 +208,7 @@ class TestDetailsView:
                     ttk.Label(factor_frame, text=f"Weight: {self.model.factors['can_be_automated']['weight']}").grid(
                         row=1, column=0, sticky=tk.W, padx=5, pady=2
                     )
-                    ttk.Label(factor_frame, text="Tests marked as 'Cannot be automated' are assigned zero priority.").grid(
+                    ttk.Label(factor_frame, text="Tests marked as 'Won't be automated' are assigned zero priority.").grid(
                         row=2, column=0, sticky=tk.W, padx=5, pady=2
                     )
                 
@@ -261,8 +261,8 @@ class TestDetailsView:
         row += 1
         
         for factor, details in self.model.factors.items():
-            # For can't automate tests, skip displaying other factors if we're in view mode
-            if self.test['priority'] == "Can't Automate" and factor != "can_be_automated" and not self.is_edit_mode:
+            # For won't automate tests, skip displaying other factors if we're in view mode
+            if self.test['priority'] == "Won't Automate" and factor != "can_be_automated" and not self.is_edit_mode:
                 continue
                 
             current_score = self.test["scores"].get(factor, 3)  # Default to 3 if missing
