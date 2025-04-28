@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Automation Priority Report</title>
+    <style>
+        :root {
+            --highest-color: #d32f2f;
+            --high-color: #f57c00;
+            --medium-color: #fbc02d;
+            --low-color: #29b6f6;
+            --lowest-color: #4fc3f7;
+            --cant-automate-color: #9e9e9e;
+            --bg-color: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --secondary-text: #666666;
+            --border-color: #e0e0e0;
+            --header-bg: #37474f;
+            --header-text: #ffffff;
+            --tab-active-bg: #ffffff;
+            --tab-inactive-bg: #e0e0e0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-content h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .timestamp {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-header {
+            padding: 15px;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .highest .card-header { background-color: var(--highest-color); }
+        .high .card-header { background-color: var(--high-color); }
+        .medium .card-header { background-color: var(--medium-color); }
+        .low .card-header { background-color: var(--low-color); }
+        .lowest .card-header { background-color: var(--lowest-color); }
+        .cant-automate .card-header { background-color: var(--cant-automate-color); }
+        
+        .card-count {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .card-body {
+            padding: 15px;
+            font-size: 14px;
+            color: var(--secondary-text);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .card-threshold {
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        
+        /* Tabs Styling */
+        .tabs {
+            margin-top: 20px;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            background-color: var(--tab-inactive-bg);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+        }
+        
+        .tab-button:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .tab-button.active {
+            background-color: var(--tab-active-bg);
+            border-bottom: 3px solid var(--header-bg);
+            margin-bottom: -2px;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: var(--tab-active-bg);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Chart styling */
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--header-bg);
+        }
+        
+        .chart-img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Test cards styling */
+        .test-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .test-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease-in-out;
+        }
+        
+        .test-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .test-card-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        .test-card-header h3 {
+            margin-right: 50px;
+            font-size: 16px;
+        }
+        
+        .score-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .priority-highest .score-badge { background-color: var(--highest-color); }
+        .priority-high .score-badge { background-color: var(--high-color); }
+        .priority-medium .score-badge { background-color: var(--medium-color); }
+        .priority-low .score-badge { background-color: var(--low-color); }
+        .priority-lowest .score-badge { background-color: var(--lowest-color); }
+        .priority-cant-automate .score-badge { background-color: var(--cant-automate-color); }
+        
+        .test-meta {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+        
+        .meta-item {
+            background-color: var(--bg-color);
+            border-radius: 4px;
+            padding: 3px 8px;
+        }
+        
+        .test-card-body {
+            padding: 15px;
+        }
+        
+        .test-description {
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: var(--secondary-text);
+            border-left: 3px solid var(--border-color);
+            padding-left: 10px;
+        }
+        
+        .factor-list {
+            list-style-type: none;
+        }
+        
+        .factor-item {
+            margin-bottom: 5px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .factor-score {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            text-align: center;
+            line-height: 20px;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 12px;
+        }
+        
+        .factor-name {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .factor-description {
+            color: var(--secondary-text);
+        }
+        
+        /* Filter section */
+        .filter-section {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .filter-section h3 {
+            margin-bottom: 10px;
+            color: var(--header-bg);
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        .filter-group label {
+            font-size: 13px;
+            margin-bottom: 5px;
+            color: var(--secondary-text);
+        }
+        
+        .filter-select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Test table */
+        .test-table-container {
+            overflow-x: auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .test-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .test-table th, .test-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .test-table th {
+            background-color: #f9f9f9;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+        
+        .test-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .test-table .highest { color: var(--highest-color); font-weight: bold; }
+        .test-table .high { color: var(--high-color); font-weight: bold; }
+        .test-table .medium { color: var(--medium-color); font-weight: bold; }
+        .test-table .low { color: var(--low-color); font-weight: bold; }
+        .test-table .lowest { color: var(--lowest-color); font-weight: bold; }
+        .test-table .cant-automate { color: var(--cant-automate-color); font-weight: bold; }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--header-bg);
+            color: var(--header-text);
+            font-size: 12px;
+            margin-top: 50px;
+        }
+        
+        .no-data-message {
+            text-align: center;
+            padding: 40px;
+            font-style: italic;
+            color: var(--secondary-text);
+        }
+        
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .test-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            header .container {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-meta {
+                margin-top: 10px;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <h1>Enhanced Test Automation Report</h1>
+                <div class="timestamp">Generated: {{timestamp}}</div>
+            </div>
+            <div class="header-meta">
+                <div>Total Tests: {{total_tests}}</div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card highest">
+                <div class="card-header">
+                    <span>Highest Priority</span>
+                    <span class="card-count">{{highest_count}}</span>
+                </div>
+                <div class="card-body">
+                    <div>Recommended for immediate automation</div>
+                    <div class="card-threshold">Score: ≥ {{highest_threshold}}</div>
+                </div>
+            </div>
+            
+            <div class="summary-card high">
+                <div class="card-header">
+                    <span>High Priority</span>
+                    <span class="card-count">{{high_count}}</span>
+                </div>
+                <div class="card-body">
+                    <div>Recommended for second phase</div>
+                    <div class="card-threshold">Score: {{high_threshold}} - {{highest_threshold_minus}}</div>
+                </div>
+            </div>
+            
+            <div class="summary-card medium">
+                <div class="card-header">
+                    <span>Medium Priority</span>
+                    <span class="card-count">{{medium_count}}</span>
+                </div>
+                <div class="card-body">
+                    <div>Recommended for third phase</div>
+                    <div class="card-threshold">Score: {{medium_threshold}} - {{high_threshold_minus}}</div>
+                </div>
+            </div>
+            
+            <div class="summary-card low">
+                <div class="card-header">
+                    <span>Low Priority</span>
+                    <span class="card-count">{{low_count}}</span>
+                </div>
+                <div class="card-body">
+                    <div>Consider for later phases</div>
+                    <div class="card-threshold">Score: {{low_threshold}} - {{medium_threshold_minus}}</div>
+                </div>
+            </div>
+            
+            <div class="summary-card lowest">
+                <div class="card-header">
+                    <span>Lowest Priority</span>
+                    <span class="card-count">{{lowest_count}}</span>
+                </div>
+                <div class="card-body">
+                    <div>Not recommended for automation</div>
+                    <div class="card-threshold">Score: < {{low_threshold}}</div>
+                </div>
+            </div>
+            
+            <div class="summary-card cant-automate">
+                <div class="card-header">
+                    <span>Can't Automate</span>
+                    <span class="card-count">{{cant_automate_count}}</span>
+                </div>
+                <div class="card-body">
+                    <div>Not possible to automate</div>
+                    <div class="card-threshold">Manual testing only</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabs Section -->
+        <div class="tabs">
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="dashboard">Dashboard</button>
+                <button class="tab-button" data-tab="priority-distribution">Priority Distribution</button>
+                <button class="tab-button" data-tab="score-distribution">Score Distribution</button>
+                <button class="tab-button" data-tab="factor-contribution">Factor Contribution</button>
+                <button class="tab-button" data-tab="top-tests">Top Tests</button>
+                <button class="tab-button" data-tab="all-tests">All Tests</button>
+                <button class="tab-button" data-tab="highest-priority">Highest Priority</button>
+                <button class="tab-button" data-tab="high-priority">High Priority</button>
+                <button class="tab-button" data-tab="medium-priority">Medium Priority</button>
+                <button class="tab-button" data-tab="low-priority">Low Priority</button>
+                <button class="tab-button" data-tab="lowest-priority">Lowest Priority</button>
+                <button class="tab-button" data-tab="cant-automate">Can't Automate</button>
+            </div>
+            
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="dashboard">
+                <h2>Test Automation Prioritization Dashboard</h2>
+                <p>Overview of your test prioritization status.</p>
+                
+                <div class="chart-container">
+                    <div class="chart-title">Priority Distribution</div>
+                    {{priority_chart}}
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">Top 10 Tests by Priority Score</div>
+                    {{top_tests_chart}}
+                </div>
+            </div>
+            
+            <!-- Priority Distribution Tab -->
+            <div class="tab-content" id="priority-distribution">
+                <h2>Priority Distribution</h2>
+                <p>Distribution of tests across priority categories.</p>
+                
+                <div class="chart-container">
+                    {{priority_chart}}
+                </div>
+            </div>
+            
+            <!-- Score Distribution Tab -->
+            <div class="tab-content" id="score-distribution">
+                <h2>Score Distribution</h2>
+                <p>Distribution of test scores across the full range.</p>
+                
+                <div class="chart-container">
+                    {{score_distribution_chart}}
+                </div>
+            </div>
+            
+            <!-- Factor Contribution Tab -->
+            <div class="tab-content" id="factor-contribution">
+                <h2>Factor Contribution</h2>
+                <p>Analysis of how different factors contribute to test priority scores.</p>
+                
+                <div class="chart-container">
+                    {{factor_contribution_chart}}
+                </div>
+            </div>
+            
+            <!-- Top Tests Tab -->
+            <div class="tab-content" id="top-tests">
+                <h2>Top Tests</h2>
+                <p>Tests with the highest priority scores, recommended for immediate automation.</p>
+                
+                <div class="chart-container">
+                    {{top_tests_chart}}
+                </div>
+            </div>
+            
+            <!-- All Tests Tab -->
+            <div class="tab-content" id="all-tests">
+                <h2>All Tests</h2>
+                <p>Complete list of tests sorted by priority.</p>
+                
+                <div class="filter-section">
+                    <h3>Filter Tests</h3>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label for="section-filter">Section:</label>
+                            <select id="section-filter" class="filter-select">
+                                <option value="all">All Sections</option>
+                                <!-- Section options will be populated by JavaScript -->
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="priority-filter">Priority:</label>
+                            <select id="priority-filter" class="filter-select">
+                                <option value="all">All Priorities</option>
+                                <option value="Highest">Highest</option>
+                                <option value="High">High</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Low">Low</option>
+                                <option value="Lowest">Lowest</option>
+                                <option value="Can't Automate">Can't Automate</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="test-table-container">
+                    <table class="test-table" id="test-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Section</th>
+                                <th>Priority</th>
+                                <th>Score</th>
+                                <th>Ticket ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Test rows will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Priority-specific Tabs -->
+            <!-- Highest Priority Tab -->
+            <div class="tab-content" id="highest-priority">
+                <h2>Highest Priority Tests</h2>
+                <p>Tests recommended for immediate automation (Score >= {{highest_threshold}}).</p>
+                
+                <div class="test-cards">
+                    {{highest_priority_cards}}
+                </div>
+            </div>
+            
+            <!-- High Priority Tab -->
+            <div class="tab-content" id="high-priority">
+                <h2>High Priority Tests</h2>
+                <p>Tests recommended for second phase automation (Score {{high_threshold}} - {{highest_threshold_minus}}).</p>
+                
+                <div class="test-cards">
+                    {{high_priority_cards}}
+                </div>
+            </div>
+            
+            <!-- Medium Priority Tab -->
+            <div class="tab-content" id="medium-priority">
+                <h2>Medium Priority Tests</h2>
+                <p>Tests recommended for third phase automation (Score {{medium_threshold}} - {{high_threshold_minus}}).</p>
+                
+                <div class="test-cards">
+                    {{medium_priority_cards}}
+                </div>
+            </div>
+            
+            <!-- Low Priority Tab -->
+            <div class="tab-content" id="low-priority">
+                <h2>Low Priority Tests</h2>
+                <p>Tests to consider for later phases (Score {{low_threshold}} - {{medium_threshold_minus}}).</p>
+                
+                <div class="test-cards">
+                    {{low_priority_cards}}
+                </div>
+            </div>
+            
+            <!-- Lowest Priority Tab -->
+            <div class="tab-content" id="lowest-priority">
+                <h2>Lowest Priority Tests</h2>
+                <p>Tests not recommended for automation (Score < {{low_threshold}}).</p>
+                
+                <div class="test-cards">
+                    {{lowest_priority_cards}}
+                </div>
+            </div>
+            
+            <!-- Can't Automate Tab -->
+            <div class="tab-content" id="cant-automate">
+                <h2>Tests That Can't Be Automated</h2>
+                <p>Tests identified as not possible to automate.</p>
+                
+                <div class="test-cards">
+                    {{cant_automate_cards}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div>Test Automation Priority Report</div>
+        <div>Generated using the Test Prioritization Tool</div>
+    </footer>
+    
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    
+                    // Show corresponding content
+                    const tabId = button.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Filter functionality for test table
+            const sectionFilter = document.getElementById('section-filter');
+            const priorityFilter = document.getElementById('priority-filter');
+            const testTable = document.getElementById('test-table');
+            
+            // Function to filter the table
+            function filterTable() {
+                const section = sectionFilter.value;
+                const priority = priorityFilter.value;
+                
+                const rows = testTable.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    const rowSection = row.querySelector('td:nth-child(3)').textContent;
+                    const rowPriority = row.querySelector('td:nth-child(4)').textContent;
+                    
+                    const sectionMatch = section === 'all' || rowSection === section;
+                    const priorityMatch = priority === 'all' || rowPriority === priority;
+                    
+                    if (sectionMatch && priorityMatch) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Add event listeners for filter changes
+            if (sectionFilter && priorityFilter) {
+                sectionFilter.addEventListener('change', filterTable);
+                priorityFilter.addEventListener('change', filterTable);
+            }
+            
+            // Initialize the table and filters
+            const testData = JSON.parse('{{test_data_json}}');
+            
+            // Populate the table with test data
+            function populateTable() {
+                const tableBody = testTable ? testTable.querySelector('tbody') : null;
+                if (!tableBody) return;
+                
+                // Clear existing rows
+                tableBody.innerHTML = '';
+                
+                // Add test rows
+                testData.forEach((test, index) => {
+                    const row = document.createElement('tr');
+                    
+                    // Create table cells
+                    const idCell = document.createElement('td');
+                    idCell.textContent = test.id;
+                    row.appendChild(idCell);
+                    
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = test.name;
+                    row.appendChild(nameCell);
+                    
+                    const sectionCell = document.createElement('td');
+                    sectionCell.textContent = test.section || '';
+                    row.appendChild(sectionCell);
+                    
+                    const priorityCell = document.createElement('td');
+                    priorityCell.textContent = test.priority;
+                    priorityCell.className = test.priority.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    row.appendChild(priorityCell);
+                    
+                    const scoreCell = document.createElement('td');
+                    scoreCell.textContent = test.total_score;
+                    row.appendChild(scoreCell);
+                    
+                    const ticketCell = document.createElement('td');
+                    ticketCell.textContent = test.ticket_id || '';
+                    row.appendChild(ticketCell);
+                    
+                    tableBody.appendChild(row);
+                });
+            }
+            
+            // Populate the sections filter
+            function populateSectionsFilter() {
+                if (!sectionFilter) return;
+                
+                // Get unique sections
+                const sections = [];
+                testData.forEach(test => {
+                    if (test.section && !sections.includes(test.section)) {
+                        sections.push(test.section);
+                    }
+                });
+                
+                // Sort sections alphabetically
+                sections.sort();
+                
+                // Clear existing options except 'All Sections'
+                while (sectionFilter.options.length > 1) {
+                    sectionFilter.remove(1);
+                }
+                
+                // Add section options
+                sections.forEach(section => {
+                    const option = document.createElement('option');
+                    option.value = section;
+                    option.textContent = section;
+                    sectionFilter.appendChild(option);
+                });
+            }
+            
+            // Initialize the table and filters
+            populateTable();
+            populateSectionsFilter();
+        });
+    </script>
+</body>
+</html>

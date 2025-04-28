@@ -70,5 +70,6 @@ class BaseReportView:
 from views.reports.text_report import TextReportView
 from views.reports.chart_report import ChartReportView
 from views.reports.html_report import HtmlReportView
+from views.reports.enhanced_html_report import EnhancedHtmlReportView
 
-__all__ = ['BaseReportView', 'TextReportView', 'ChartReportView', 'HtmlReportView']
+__all__ = ['BaseReportView', 'TextReportView', 'ChartReportView', 'HtmlReportView', 'EnhancedHtmlReportView']
