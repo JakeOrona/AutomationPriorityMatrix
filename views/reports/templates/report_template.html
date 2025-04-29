@@ -12,7 +12,6 @@
             --low-color: #29b6f6;
             --lowest-color: #4fc3f7;
             --wont-automate-color: #9e9e9e;
-            --all-tests-color: #9600ec;
             --bg-color: #f5f5f5;
             --card-bg: #ffffff;
             --text-color: #000000;
@@ -20,7 +19,7 @@
             --border-color: #e0e0e0;
             --header-bg: #37474f;
             --header-text: #ffffff;
-            --tab-active-bg: #ffffff;
+            --tab-active-bg: #A200FF;
             --tab-inactive-bg: #e0e0e0;
             --section-title-color: #2c3e50;
             --anchor-link-color: #3498db;
@@ -204,20 +203,21 @@
         /* Priority Filter Buttons */
         .priority-filter-buttons {
             display: flex;
+            justify-content: center;
             flex-wrap: wrap;
             gap: 10px;
-            margin-bottom: 20px;
-            justify-content: center;
+            margin: 20px 0;
         }
-        
+
         .priority-filter-button {
-            padding: 8px 16px;
+            padding: 8px 15px;
             border: none;
             border-radius: 20px;
-            font-weight: bold;
             cursor: pointer;
-            color: #111441;
+            font-weight: bold;
+            color: white;
             transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .priority-filter-button.highest { background-color: var(--highest-color); }
@@ -226,15 +226,15 @@
         .priority-filter-button.low { background-color: var(--low-color); }
         .priority-filter-button.lowest { background-color: var(--lowest-color); }
         .priority-filter-button.wont-automate { background-color: var(--wont-automate-color); }
-        .priority-filter-button.all { background-color: var(--all-tests-color); }
+        .priority-filter-button.all { background-color: #546e7a; }
         
         .priority-filter-button:hover {
-            filter: brightness(1.1);
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         
         .priority-filter-button.active {
-            box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor;
+            box-shadow: 0 0 0 2px var(--tab-active-bg), 0 0 0 4px currentColor;
         }
         
         /* Test Cards Container */
@@ -250,8 +250,8 @@
         /* Test Cards */
         .test-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
             margin-bottom: 20px;
         }
         
@@ -260,8 +260,8 @@
             background-color: var(--card-bg);
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
             cursor: pointer;
             height: auto;
             display: flex;
@@ -269,28 +269,47 @@
         }
         
         .test-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         
         .test-card-header {
-            padding: 15px;
-            border-bottom: 0; /* Remove border when collapsed */
+            padding: 12px;
+            border-bottom: 0;
             position: relative;
             flex-shrink: 0;
         }
         
         .test-card.expanded .test-card-header {
-            border-bottom: 1px solid var(--border-color); /* Add border when expanded */
+            border-bottom: 1px solid var(--border-color);
         }
         
         .test-card-header h3 {
-            margin-right: 50px;
-            font-size: 16px;
-            margin-bottom: 8px;
+            margin-right: 45px;
+            font-size: 15px;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
         }
+
+        .priority-level {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            margin-right: 8px;
+        }
         
+        .priority-highest .priority-level { background-color: var(--highest-color); }
+        .priority-high .priority-level { background-color: var(--high-color); }
+        .priority-medium .priority-level { background-color: var(--medium-color); }
+        .priority-low .priority-level { background-color: var(--low-color); }
+        .priority-lowest .priority-level { background-color: var(--lowest-color); }
+        .priority-wont-automate .priority-level { background-color: var(--wont-automate-color); }
+
         .expand-indicator {
             display: inline-block;
             margin-left: 8px;
@@ -335,9 +354,12 @@
         }
         
         .test-card.expanded .test-card-body {
-            padding: 15px;
-            max-height: 1000px; /* Large value to accommodate content */
+            padding: 12px;
+            max-height: 1000px;
             opacity: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-gap: 15px;
         }
         
         .score-badge {
@@ -364,9 +386,9 @@
         .test-meta {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 5px;
-            font-size: 13px;
+            gap: 6px;
+            margin-top: 4px;
+            font-size: 12px;
         }
         
         .meta-item {
@@ -381,11 +403,28 @@
         }
         
         .test-description {
-            margin-bottom: 15px;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--secondary-text);
+            margin-top: 4px;
+            margin-bottom: 8px;
             border-left: 3px solid var(--border-color);
             padding-left: 10px;
+            max-height: 40px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+        }
+
+        .factors-section {
+            margin-bottom: 10px;
+        }
+
+        .factors-title {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--text-color);
         }
         
         .factor-list {
@@ -393,8 +432,8 @@
         }
         
         .factor-item {
-            margin-bottom: 5px;
-            font-size: 13px;
+            margin-bottom: 4px;
+            font-size: 12px;
             display: flex;
             align-items: center;
         }
@@ -420,6 +459,17 @@
         
         .factor-description {
             color: var(--secondary-text);
+        }
+
+        .priority-level {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            margin-right: 8px;
         }
         
         /* Filter Section */
@@ -645,6 +695,21 @@
             }
             
             .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .priority-filter-buttons {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                justify-content: flex-start;
+                padding-bottom: 10px;
+            }
+            
+            .priority-filter-button {
+                flex: 0 0 auto;
+            }
+
+            .test-card.expanded .test-card-body {
                 grid-template-columns: 1fr;
             }
         }
@@ -1375,10 +1440,62 @@
                     sectionFilter.appendChild(option);
                 });
             }
+
+                        // Add priority level indicator to test cards
+            function addPriorityLevels() {
+                const testCards = document.querySelectorAll('.test-card');
+                
+                testCards.forEach(card => {
+                    // Get priority class
+                    const priorityClass = Array.from(card.classList)
+                        .find(cls => cls.startsWith('priority-'));
+                    
+                    if (!priorityClass) return;
+                    
+                    // Extract priority name
+                    const priority = priorityClass.replace('priority-', '');
+                    const priorityDisplay = priority.charAt(0).toUpperCase() + priority.slice(1).replace('-', ' ');
+                    
+                    // Create priority level element
+                    const priorityLevel = document.createElement('span');
+                    priorityLevel.className = 'priority-level';
+                    priorityLevel.textContent = priorityDisplay;
+                    
+                    // Add to header
+                    const cardHeader = card.querySelector('.test-card-header h3');
+                    cardHeader.insertBefore(priorityLevel, cardHeader.firstChild);
+                });
+            }
+
+            // Add factors title to the factor list
+            function addFactorsTitle() {
+                const testCards = document.querySelectorAll('.test-card');
+                
+                testCards.forEach(card => {
+                    const factorList = card.querySelector('.factor-list');
+                    if (!factorList) return;
+                    
+                    // Create wrapper div for factors
+                    const factorsSection = document.createElement('div');
+                    factorsSection.className = 'factors-section';
+                    
+                    // Create factors title
+                    const factorsTitle = document.createElement('div');
+                    factorsTitle.className = 'factors-title';
+                    factorsTitle.textContent = 'Score Factors';
+                    
+                    // Move factor list into wrapper
+                    factorList.parentNode.insertBefore(factorsSection, factorList);
+                    factorsSection.appendChild(factorsTitle);
+                    factorsSection.appendChild(factorList);
+                });
+            }
             
             // Initialize the table and filters
             populateTable();
             populateSectionsFilter();
+            addPriorityLevels();
+            addFactorsTitle();
             
             // Set default active filter for priority tests
             document.querySelector('.priority-filter-button[data-priority="all"]').click();
