@@ -41,7 +41,7 @@
             scroll-behavior: smooth;
         }
         
-        /* Modern layout combined with original styling */
+        /* Layout */
         .main-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -139,7 +139,7 @@
             opacity: 1;
         }
         
-        /* Original Summary Cards Styling */
+        /* Summary Cards */
         .summary-cards {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -233,19 +233,35 @@
             box-shadow: 0 0 0 2px white, 0 0 0 4px currentColor;
         }
         
-        /* Original Test Cards Styling */
+        /* Test Cards Container */
+        .priority-test-cards-container {
+            margin-top: 30px;
+        }
+        
+        /* Priority groups display */
+        .priority-group {
+            display: block; /* Changed from grid to block for pagination */
+        }
+        
+        /* Test Cards */
         .test-cards {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
+            margin-bottom: 20px;
         }
         
+        /* Collapsible Test Cards */
         .test-card {
             background-color: var(--card-bg);
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             transition: transform 0.2s ease-in-out;
+            cursor: pointer;
+            height: auto;
+            display: flex;
+            flex-direction: column;
         }
         
         .test-card:hover {
@@ -254,14 +270,70 @@
         
         .test-card-header {
             padding: 15px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 0; /* Remove border when collapsed */
             position: relative;
+            flex-shrink: 0;
         }
-
+        
+        .test-card.expanded .test-card-header {
+            border-bottom: 1px solid var(--border-color); /* Add border when expanded */
+        }
+        
         .test-card-header h3 {
             margin-right: 50px;
             font-size: 16px;
             margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .expand-indicator {
+            display: inline-block;
+            margin-left: 8px;
+            width: 16px;
+            height: 16px;
+            position: relative;
+        }
+        
+        .expand-indicator::before,
+        .expand-indicator::after {
+            content: '';
+            position: absolute;
+            background-color: var(--text-color);
+            transition: transform 0.3s;
+        }
+        
+        .expand-indicator::before {
+            top: 7px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+        }
+        
+        .expand-indicator::after {
+            top: 0;
+            left: 7px;
+            width: 2px;
+            height: 100%;
+            transform: scaleY(1);
+        }
+        
+        .test-card.expanded .expand-indicator::after {
+            transform: scaleY(0);
+        }
+        
+        .test-card-body {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease, opacity 0.2s ease-in-out;
+            opacity: 0;
+        }
+        
+        .test-card.expanded .test-card-body {
+            padding: 15px;
+            max-height: 1000px; /* Large value to accommodate content */
+            opacity: 1;
         }
         
         .score-badge {
@@ -292,7 +364,7 @@
             margin-top: 5px;
             font-size: 13px;
         }
-
+        
         .meta-item {
             background-color: var(--bg-color);
             border-radius: 4px;
@@ -302,10 +374,6 @@
             max-width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-        
-        .test-card-body {
-            padding: 15px;
         }
         
         .test-description {
@@ -350,12 +418,7 @@
             color: var(--secondary-text);
         }
         
-        /* Test Cards Container */
-        .priority-test-cards-container {
-            margin-top: 30px;
-        }
-        
-        /* Original Filter Section Styling */
+        /* Filter Section */
         .filter-section {
             background-color: white;
             padding: 15px;
@@ -393,7 +456,7 @@
             border: 1px solid var(--border-color);
         }
         
-        /* Original Test Table Styling */
+        /* Test Table */
         .test-table-container {
             overflow-x: auto;
             background-color: white;
@@ -431,7 +494,7 @@
         .test-table .lowest { color: var(--lowest-color); font-weight: bold; }
         .test-table .wont-automate { color: var(--wont-automate-color); font-weight: bold; }
         
-        /* Pagination Controls */
+        /* All Tests Pagination */
         .pagination {
             display: flex;
             justify-content: center;
@@ -465,7 +528,47 @@
             font-size: 14px;
         }
         
-        /* Charts Grid */
+        /* Priority Tests Pagination */
+        .priority-pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .priority-pagination-button {
+            padding: 8px 15px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .priority-pagination-button:hover {
+            background-color: var(--tab-inactive-bg);
+        }
+        
+        .priority-pagination-button.active {
+            background-color: var(--header-bg);
+            color: white;
+            border-color: var(--header-bg);
+        }
+        
+        .priority-pagination-info {
+            display: flex;
+            align-items: center;
+            color: var(--secondary-text);
+            font-size: 14px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .priority-pagination-container {
+            margin-top: 20px;
+        }
+        
+        /* Charts Section */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
@@ -473,7 +576,6 @@
             margin-bottom: 30px;
         }
         
-        /* Chart styling */
         .chart-container {
             background-color: white;
             border-radius: 8px;
@@ -497,6 +599,7 @@
             height: auto;
         }
         
+        /* Footer */
         footer {
             text-align: center;
             padding: 20px;
@@ -513,6 +616,7 @@
             color: var(--secondary-text);
         }
         
+        /* Responsive Styling */
         @media (max-width: 768px) {
             .summary-cards {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -788,8 +892,301 @@
         <div>Test Automation Priority Report</div>
         <div>Generated using the Test Prioritization Tool</div>
     </footer>
-    
+
     <script>
+        // Collapsible test cards functionality
+        function initializeCollapsibleCards() {
+            const testCards = document.querySelectorAll('.test-card');
+            
+            testCards.forEach(card => {
+                // Add expand indicator to each card header
+                const cardHeader = card.querySelector('.test-card-header');
+                const cardTitle = cardHeader.querySelector('h3');
+                const expandIndicator = document.createElement('span');
+                expandIndicator.className = 'expand-indicator';
+                cardTitle.appendChild(expandIndicator);
+                
+                // Add click handler
+                card.addEventListener('click', (event) => {
+                    // Don't toggle if clicking on a link or button inside the card
+                    if (event.target.tagName === 'A' || event.target.tagName === 'BUTTON') {
+                        return;
+                    }
+                    
+                    // Toggle expanded class
+                    card.classList.toggle('expanded');
+                });
+            });
+        }
+    
+        // Priority tests pagination
+        const PRIORITY_CARDS_PER_PAGE = 10;
+        let priorityCurrentPages = {
+            'highest': 1,
+            'high': 1,
+            'medium': 1,
+            'low': 1,
+            'lowest': 1,
+            'wont-automate': 1
+        };
+    
+        function setupPriorityPagination() {
+            // Inject pagination controls for each priority group
+            const priorityGroups = document.querySelectorAll('.priority-group');
+            
+            priorityGroups.forEach(group => {
+                const groupId = group.id;
+                const priority = groupId.replace('-priority-cards', '').replace('-cards', '');
+                
+                // Create pagination container
+                const paginationContainer = document.createElement('div');
+                paginationContainer.className = 'priority-pagination-container';
+                
+                // Create pagination info
+                const paginationInfo = document.createElement('div');
+                paginationInfo.className = 'priority-pagination-info';
+                paginationInfo.innerHTML = `
+                    Showing <span id="${priority}-showing-start">1</span>-<span id="${priority}-showing-end">10</span> 
+                    of <span id="${priority}-total-items">0</span> tests
+                `;
+                
+                // Create pagination controls
+                const pagination = document.createElement('div');
+                pagination.className = 'priority-pagination';
+                pagination.innerHTML = `
+                    <button class="priority-pagination-button" id="${priority}-prev-page">Previous</button>
+                    <div class="priority-pagination-numbers" id="${priority}-pagination-numbers"></div>
+                    <button class="priority-pagination-button" id="${priority}-next-page">Next</button>
+                `;
+                
+                // Add to group
+                group.appendChild(paginationInfo);
+                group.appendChild(pagination);
+                
+                // Apply initial pagination
+                updatePriorityPagination(priority);
+                
+                // Add event listeners for pagination buttons
+                document.getElementById(`${priority}-prev-page`).addEventListener('click', () => {
+                    if (priorityCurrentPages[priority] > 1) {
+                        goToPriorityPage(priority, priorityCurrentPages[priority] - 1);
+                    }
+                });
+                
+                document.getElementById(`${priority}-next-page`).addEventListener('click', () => {
+                    const totalPages = Math.ceil(getVisibleCardsCount(priority) / PRIORITY_CARDS_PER_PAGE);
+                    if (priorityCurrentPages[priority] < totalPages) {
+                        goToPriorityPage(priority, priorityCurrentPages[priority] + 1);
+                    }
+                });
+            });
+        }
+    
+        function getVisibleCardsCount(priority) {
+            const groupId = priority === 'wont-automate' ? 'wont-automate-cards' : `${priority}-priority-cards`;
+            const group = document.getElementById(groupId);
+            if (!group) return 0;
+            
+            return group.querySelectorAll('.test-card').length;
+        }
+    
+        function updatePriorityPagination(priority) {
+            const groupId = priority === 'wont-automate' ? 'wont-automate-cards' : `${priority}-priority-cards`;
+            const group = document.getElementById(groupId);
+            if (!group) return;
+            
+            const cards = group.querySelectorAll('.test-card');
+            const totalCards = cards.length;
+            const totalPages = Math.ceil(totalCards / PRIORITY_CARDS_PER_PAGE);
+            const currentPage = priorityCurrentPages[priority];
+            
+            // Update info text
+            document.getElementById(`${priority}-total-items`).textContent = totalCards;
+            const start = (currentPage - 1) * PRIORITY_CARDS_PER_PAGE + 1;
+            const end = Math.min(start + PRIORITY_CARDS_PER_PAGE - 1, totalCards);
+            document.getElementById(`${priority}-showing-start`).textContent = totalCards > 0 ? start : 0;
+            document.getElementById(`${priority}-showing-end`).textContent = end;
+            
+            // Update pagination numbers
+            const paginationNumbers = document.getElementById(`${priority}-pagination-numbers`);
+            paginationNumbers.innerHTML = '';
+            
+            // Determine range of page numbers to show
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            // Add first page button if not in range
+            if (startPage > 1) {
+                const pageBtn = document.createElement('button');
+                pageBtn.classList.add('priority-pagination-button');
+                pageBtn.textContent = '1';
+                pageBtn.addEventListener('click', () => goToPriorityPage(priority, 1));
+                paginationNumbers.appendChild(pageBtn);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.margin = '0 5px';
+                    paginationNumbers.appendChild(ellipsis);
+                }
+            }
+            
+            // Add page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.classList.add('priority-pagination-button');
+                if (i === currentPage) pageBtn.classList.add('active');
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => goToPriorityPage(priority, i));
+                paginationNumbers.appendChild(pageBtn);
+            }
+            
+            // Add last page button if not in range
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.margin = '0 5px';
+                    paginationNumbers.appendChild(ellipsis);
+                }
+                
+                const pageBtn = document.createElement('button');
+                pageBtn.classList.add('priority-pagination-button');
+                pageBtn.textContent = totalPages;
+                pageBtn.addEventListener('click', () => goToPriorityPage(priority, totalPages));
+                paginationNumbers.appendChild(pageBtn);
+            }
+            
+            // Apply pagination to cards
+            applyPriorityPagination(priority);
+        }
+    
+        function applyPriorityPagination(priority) {
+            const groupId = priority === 'wont-automate' ? 'wont-automate-cards' : `${priority}-priority-cards`;
+            const group = document.getElementById(groupId);
+            if (!group) return;
+            
+            const cards = group.querySelectorAll('.test-card');
+            const currentPage = priorityCurrentPages[priority];
+            
+            const startIdx = (currentPage - 1) * PRIORITY_CARDS_PER_PAGE;
+            const endIdx = startIdx + PRIORITY_CARDS_PER_PAGE;
+            
+            cards.forEach((card, idx) => {
+                if (idx >= startIdx && idx < endIdx) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    
+        function goToPriorityPage(priority, page) {
+            priorityCurrentPages[priority] = page;
+            updatePriorityPagination(priority);
+        }
+    
+        // All tests table pagination functionality
+        let currentPage = 1;
+        let totalPages = 1;
+        const ROWS_PER_PAGE = 25;
+    
+        function updatePagination(totalRows) {
+            totalPages = Math.ceil(totalRows / ROWS_PER_PAGE);
+            document.getElementById('total-items').textContent = totalRows;
+            
+            // Update pagination numbers
+            const paginationNumbers = document.querySelector('.pagination-numbers');
+            paginationNumbers.innerHTML = '';
+            
+            // Determine range of page numbers to show
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            // Add first page button if not in range
+            if (startPage > 1) {
+                const pageBtn = document.createElement('button');
+                pageBtn.classList.add('pagination-button');
+                pageBtn.textContent = '1';
+                pageBtn.addEventListener('click', () => goToPage(1));
+                paginationNumbers.appendChild(pageBtn);
+                
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.margin = '0 5px';
+                    paginationNumbers.appendChild(ellipsis);
+                }
+            }
+            
+            // Add page numbers
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.classList.add('pagination-button');
+                if (i === currentPage) pageBtn.classList.add('active');
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => goToPage(i));
+                paginationNumbers.appendChild(pageBtn);
+            }
+            
+            // Add last page button if not in range
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.margin = '0 5px';
+                    paginationNumbers.appendChild(ellipsis);
+                }
+                
+                const pageBtn = document.createElement('button');
+                pageBtn.classList.add('pagination-button');
+                pageBtn.textContent = totalPages;
+                pageBtn.addEventListener('click', () => goToPage(totalPages));
+                paginationNumbers.appendChild(pageBtn);
+            }
+            
+            // Update showing info
+            const start = (currentPage - 1) * ROWS_PER_PAGE + 1;
+            const end = Math.min(start + ROWS_PER_PAGE - 1, totalRows);
+            document.getElementById('showing-start').textContent = totalRows > 0 ? start : 0;
+            document.getElementById('showing-end').textContent = end;
+            
+            // Apply page to table
+            applyPagination();
+        }
+        
+        function applyPagination() {
+            const testTable = document.getElementById('test-table');
+            const rows = Array.from(testTable.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
+            
+            const startIdx = (currentPage - 1) * ROWS_PER_PAGE;
+            const endIdx = startIdx + ROWS_PER_PAGE;
+            
+            rows.forEach((row, idx) => {
+                if (idx >= startIdx && idx < endIdx) {
+                    row.classList.add('visible-row');
+                    row.style.display = '';
+                } else {
+                    row.classList.remove('visible-row');
+                    row.style.display = 'none';
+                }
+            });
+        }
+        
+        function goToPage(page) {
+            currentPage = page;
+            updatePagination(document.querySelectorAll('#test-table tbody tr').length);
+        }
+    
+        // Main initialization function - runs when the page loads
         document.addEventListener('DOMContentLoaded', function() {
             // Priority cards click handling
             const summaryCards = document.querySelectorAll('.summary-card');
@@ -803,10 +1200,14 @@
                 });
             });
             
+            // Initialize the collapsible cards
+            initializeCollapsibleCards();
+            
+            // Setup priority pagination
+            setupPriorityPagination();
+            
             // Priority filter buttons
             const filterButtons = document.querySelectorAll('.priority-filter-button');
-            const priorityGroups = document.querySelectorAll('.priority-group');
-
             filterButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     // Remove active class from all buttons
@@ -817,19 +1218,28 @@
                     const priority = button.getAttribute('data-priority');
                     
                     // Hide all test card groups
+                    const priorityGroups = document.querySelectorAll('.priority-group');
                     priorityGroups.forEach(group => {
                         group.style.display = 'none';
                     });
                     
-                    // Show selected group or all groups
+                    // Show selected group
                     if (priority === 'all') {
-                        document.getElementById('highest-priority-cards').style.display = 'grid';
+                        const highestGroup = document.getElementById('highest-priority-cards');
+                        if (highestGroup) {
+                            highestGroup.style.display = 'block';
+                            // Reset to page 1 when switching groups
+                            priorityCurrentPages['highest'] = 1;
+                            updatePriorityPagination('highest');
+                        }
                     } else {
-                        // Fix for the "won't-automate" button - use correct ID
                         const targetId = priority === 'wont-automate' ? 'wont-automate-cards' : `${priority}-priority-cards`;
                         const targetElement = document.getElementById(targetId);
                         if (targetElement) {
-                            targetElement.style.display = 'grid';
+                            targetElement.style.display = 'block';
+                            // Reset to page 1 when switching groups
+                            priorityCurrentPages[priority] = 1;
+                            updatePriorityPagination(priority);
                         } else {
                             console.error(`Element with ID "${targetId}" not found`);
                         }
@@ -876,102 +1286,7 @@
                 priorityFilter.addEventListener('change', filterTable);
             }
             
-            // Pagination functionality
-            const ROWS_PER_PAGE = 25;
-            let currentPage = 1;
-            let totalPages = 1;
-            
-            function updatePagination(totalRows) {
-                totalPages = Math.ceil(totalRows / ROWS_PER_PAGE);
-                document.getElementById('total-items').textContent = totalRows;
-                
-                // Update pagination numbers
-                const paginationNumbers = document.querySelector('.pagination-numbers');
-                paginationNumbers.innerHTML = '';
-                
-                // Determine range of page numbers to show
-                let startPage = Math.max(1, currentPage - 2);
-                let endPage = Math.min(totalPages, startPage + 4);
-                
-                if (endPage - startPage < 4) {
-                    startPage = Math.max(1, endPage - 4);
-                }
-                
-                // Add first page button if not in range
-                if (startPage > 1) {
-                    const pageBtn = document.createElement('button');
-                    pageBtn.classList.add('pagination-button');
-                    pageBtn.textContent = '1';
-                    pageBtn.addEventListener('click', () => goToPage(1));
-                    paginationNumbers.appendChild(pageBtn);
-                    
-                    if (startPage > 2) {
-                        const ellipsis = document.createElement('span');
-                        ellipsis.textContent = '...';
-                        ellipsis.style.margin = '0 5px';
-                        paginationNumbers.appendChild(ellipsis);
-                    }
-                }
-                
-                // Add page numbers
-                for (let i = startPage; i <= endPage; i++) {
-                    const pageBtn = document.createElement('button');
-                    pageBtn.classList.add('pagination-button');
-                    if (i === currentPage) pageBtn.classList.add('active');
-                    pageBtn.textContent = i;
-                    pageBtn.addEventListener('click', () => goToPage(i));
-                    paginationNumbers.appendChild(pageBtn);
-                }
-                
-                // Add last page button if not in range
-                if (endPage < totalPages) {
-                    if (endPage < totalPages - 1) {
-                        const ellipsis = document.createElement('span');
-                        ellipsis.textContent = '...';
-                        ellipsis.style.margin = '0 5px';
-                        paginationNumbers.appendChild(ellipsis);
-                    }
-                    
-                    const pageBtn = document.createElement('button');
-                    pageBtn.classList.add('pagination-button');
-                    pageBtn.textContent = totalPages;
-                    pageBtn.addEventListener('click', () => goToPage(totalPages));
-                    paginationNumbers.appendChild(pageBtn);
-                }
-                
-                // Update showing info
-                const start = (currentPage - 1) * ROWS_PER_PAGE + 1;
-                const end = Math.min(start + ROWS_PER_PAGE - 1, totalRows);
-                document.getElementById('showing-start').textContent = totalRows > 0 ? start : 0;
-                document.getElementById('showing-end').textContent = end;
-                
-                // Apply page to table
-                applyPagination();
-            }
-            
-            function applyPagination() {
-                const rows = Array.from(testTable.querySelectorAll('tbody tr')).filter(row => row.style.display !== 'none');
-                
-                const startIdx = (currentPage - 1) * ROWS_PER_PAGE;
-                const endIdx = startIdx + ROWS_PER_PAGE;
-                
-                rows.forEach((row, idx) => {
-                    if (idx >= startIdx && idx < endIdx) {
-                        row.classList.add('visible-row');
-                        row.style.display = '';
-                    } else {
-                        row.classList.remove('visible-row');
-                        row.style.display = 'none';
-                    }
-                });
-            }
-            
-            function goToPage(page) {
-                currentPage = page;
-                updatePagination(document.querySelectorAll('#test-table tbody tr').length);
-            }
-            
-            // Next and Previous buttons
+            // Next and Previous buttons for the all tests table
             document.getElementById('prev-page').addEventListener('click', () => {
                 if (currentPage > 1) {
                     goToPage(currentPage - 1);
@@ -1061,7 +1376,7 @@
             populateTable();
             populateSectionsFilter();
             
-            // Set default active filter
+            // Set default active filter for priority tests
             document.querySelector('.priority-filter-button[data-priority="all"]').click();
         });
     </script>
