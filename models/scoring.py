@@ -64,8 +64,13 @@ class ScoringSystem:
             }
         }
 
-        # Yes/No questions (currently empty, but kept for future extensibility)
-        self.yes_no_questions = {}
+        # Yes/No questions
+        self.yes_no_questions = {
+            "has_steps": {
+                "question": "Does this test case have steps?",
+                "impact": "Needed to start automation"
+            }
+        }
     
     def calculate_score(self, scores, yes_no_answers=None):
         """

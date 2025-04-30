@@ -355,6 +355,15 @@ class TestPrioritizationModel:
                     else:
                         scores[factor_key] = 3  # Default to medium if missing
             
+            # Extract yes_no_answers from imported data
+            yes_no_answers = {}
+            for question_key in self.yes_no_questions:
+                question_field = f"Question: {question_key}"
+                if question_field in data:
+                    answer_text = data.get(question_field, "No")
+                    # Convert string "Yes" or "No" to boolean
+                    yes_no_answers[question_key] = answer_text.lower() == "yes"
+            
             # Check if test can be automated
             can_be_automated = True
             if "can_be_automated" in scores and scores["can_be_automated"] == 1:  # can_be_automated == "No"
@@ -363,8 +372,8 @@ class TestPrioritizationModel:
                 normalized_score = 0
                 priority_category = "Won't Automate"
             else:
-                # Calculate raw score
-                raw_score, normalized_score = self.scoring.calculate_score(scores, {})
+                # Calculate raw score with yes_no_answers
+                raw_score, normalized_score = self.scoring.calculate_score(scores, yes_no_answers)
 
                 # Get priority category
                 priority_category = self.scoring.get_priority_category(normalized_score, can_be_automated)
@@ -391,6 +400,7 @@ class TestPrioritizationModel:
                 "ticket_id": data.get("Ticket ID", ""),
                 "description": description,
                 "scores": scores,
+                "yes_no_answers": yes_no_answers,
                 "raw_score": raw_score,
                 "total_score": round(normalized_score, 1),  # Round to 1 decimal place
                 "priority": priority_category

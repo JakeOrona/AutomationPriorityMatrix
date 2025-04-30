@@ -110,7 +110,7 @@ class TestForm:
         
         info_row += 1
         
-        # "Can it be automated?" factor moved to basic info section
+        # "Can it be automated?" factor
         if "can_be_automated" in self.model.factors:
             # Add a separator
             ttk.Separator(basic_info_frame, orient='horizontal').grid(
@@ -147,6 +147,36 @@ class TestForm:
             info_label.grid(row=info_row, column=0, columnspan=2, sticky=tk.W, pady=5, padx=5)
         
         form_row += 1
+
+        # Yes/No questions section - only create if the model has yes/no questions
+        if self.model.yes_no_questions:
+            ttk.Label(basic_info_frame, text="Additional Questions:").grid(row=info_row, column=0, sticky=tk.W, pady=5, padx=5)
+            questions_frame = ttk.Frame(basic_info_frame)
+            questions_frame.grid(row=info_row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
+            
+            for key, question_data in self.model.yes_no_questions.items():
+                self.yes_no_vars[key] = tk.BooleanVar(value=False)
+                
+                question_frame = ttk.Frame(questions_frame)
+                question_frame.grid(row=info_row, column=0, columnspan=2, sticky=tk.W, pady=5, padx=5)
+                
+                cb = ttk.Checkbutton(
+                    question_frame,
+                    text=question_data["question"],
+                    variable=self.yes_no_vars[key]
+                )
+                cb.pack(side=tk.LEFT, anchor=tk.W)
+                
+                # Add a small label explaining the impact
+                ttk.Label(
+                    question_frame, 
+                    text=f"({question_data['impact']})",
+                    font=("", 8, "italic")
+                ).pack(side=tk.LEFT, padx=10)
+                
+                info_row += 1
+            
+            form_row += 1
         
         # Prioritization factors section
         factors_frame = ttk.LabelFrame(scrollable_frame, text="Prioritization Factors")
@@ -181,37 +211,6 @@ class TestForm:
             factor_row += 1
         
         form_row += 1
-        
-        # Yes/No questions section - only create if the model has yes/no questions
-        if self.model.yes_no_questions:
-            questions_frame = ttk.LabelFrame(scrollable_frame, text="Additional Questions")
-            questions_frame.grid(row=form_row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
-            
-            question_row = 0
-            
-            for key, question_data in self.model.yes_no_questions.items():
-                self.yes_no_vars[key] = tk.BooleanVar(value=False)
-                
-                question_frame = ttk.Frame(questions_frame)
-                question_frame.grid(row=question_row, column=0, columnspan=2, sticky=tk.W, pady=5, padx=5)
-                
-                cb = ttk.Checkbutton(
-                    question_frame,
-                    text=question_data["question"],
-                    variable=self.yes_no_vars[key]
-                )
-                cb.pack(side=tk.LEFT, anchor=tk.W)
-                
-                # Add a small label explaining the impact
-                ttk.Label(
-                    question_frame, 
-                    text=f"({question_data['impact']})",
-                    font=("", 8, "italic")
-                ).pack(side=tk.LEFT, padx=10)
-                
-                question_row += 1
-            
-            form_row += 1
         
         # Buttons for form actions
         button_frame = ttk.Frame(self.parent)
