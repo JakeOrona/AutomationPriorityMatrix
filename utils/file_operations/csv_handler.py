@@ -33,22 +33,35 @@ class CSVHandler:
             # Sort tests by score (descending)
             sorted_tests = sorted(tests, key=lambda x: x.get("total_score", 0), reverse=True)
             
-            # Create field names (column headers)
-            field_names = ["Rank", "Priority", "Ticket ID", "Section", "Test Name", "Description", 
-                            "Total Score (100-point)", "Raw Score", "Test ID"]
+            # Create initial field names (column headers)
+            initial_fields = ["Rank", "Priority", "Ticket ID", "Section", "Test Name", "Description"]
+            post_fields = ["Total Score (100-point)", "Raw Score"]
             
-            # Add factor score headers
-            for factor_key, factor_info in factors.items():
-                field_names.append(factor_info["name"])
+            # Initialize field names with initial fields
+            field_names = initial_fields.copy()
             
             # Check if we have yes/no questions to add to the CSV
+            yes_no_fields = []
             has_yes_no = False
             if len(sorted_tests) > 0 and 'yes_no_answers' in sorted_tests[0]:
                 has_yes_no = True
                 # Get the question texts from the first test's yes_no_answers
                 for question_key in sorted_tests[0].get('yes_no_answers', {}):
-                    # Fallback to just using the key as header
-                    field_names.append(f"Question: {question_key}")
+                    # Add the yes/no question fields right after description
+                    yes_no_fields.append(f"Question: {question_key}")
+            
+            # Add yes/no fields right after Description
+            field_names.extend(yes_no_fields)
+            
+            # Add scoring fields
+            field_names.extend(post_fields)
+            
+            # Add factor score headers
+            for factor_key, factor_info in factors.items():
+                field_names.append(factor_info["name"])
+
+            # Add Test ID at the end
+            field_names.append("Test ID")
             
             # Prepare data for export
             data = []
@@ -67,8 +80,15 @@ class CSVHandler:
                     "Test Name": test.get("name", ""),
                     "Description": description,
                     "Total Score (100-point)": test.get("total_score", 0),
-                    "Raw Score": test.get("raw_score", "N/A")
+                    "Raw Score": test.get("raw_score", "N/A"),
+                    "Test ID": test.get("id", "")
                 }
+                
+                # Add yes/no answers if available
+                if has_yes_no and 'yes_no_answers' in test:
+                    for question_key, answer in test['yes_no_answers'].items():
+                        question_text = f"Question: {question_key}"
+                        row[question_text] = "Yes" if answer else "No"
                 
                 # Add factor scores
                 for factor in factors:
@@ -77,20 +97,14 @@ class CSVHandler:
                     scores = test.get("scores", {})
                     row[factor_name] = scores.get(factor, 0)
                 
-                # Add yes/no answers if available
-                if has_yes_no and 'yes_no_answers' in test:
-                    for question_key, answer in test['yes_no_answers'].items():
-                        question_text = f"Question: {question_key}"
-                        row[question_text] = "Yes" if answer else "No"
-                
-                row["Test ID"] = test.get("id", "")
-
                 data.append(row)
             
             # Use pandas if available, otherwise use the built-in csv module
             if PANDAS_AVAILABLE:
                 # Create DataFrame and export
                 df = pd.DataFrame(data)
+                # Ensure columns are in the correct order
+                df = df[field_names]
                 df.to_csv(filename, index=False)
             else:
                 # Use csv module

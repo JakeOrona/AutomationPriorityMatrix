@@ -253,16 +253,91 @@ class TestDetailsView:
             
             priority_value.pack(side=tk.LEFT)
             row += 1
+            
+            # Display the "Can it be automated?" factor first
+            if "can_be_automated" in self.test["scores"]:
+                ttk.Label(self.scrollable_frame, text="Notes:", font=("", 12, "underline")).grid(
+                    row=row, column=0, columnspan=2, sticky=tk.W, pady=10
+                )
+                row += 1
+
+                factor_frame = ttk.LabelFrame(self.scrollable_frame, text="Can it be automated?")
+                factor_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
+                
+                if self.is_edit_mode:
+                    # In edit mode - show radio buttons
+                    self.edit_score_vars["can_be_automated"] = tk.IntVar(value=self.test["scores"]["can_be_automated"])
+                    
+                    for score, label in self.model.score_options["can_be_automated"].items():
+                        rb = ttk.Radiobutton(
+                            factor_frame, 
+                            text=f"{score} - {label}", 
+                            variable=self.edit_score_vars["can_be_automated"], 
+                            value=score
+                        )
+                        rb.pack(anchor=tk.W)
+                else:
+                    # In view mode - show current value
+                    current_score = self.test["scores"].get("can_be_automated", 5)  # Default to 5 (Yes) if missing
+                    factor_description = self.model.score_options["can_be_automated"][current_score]
+                    ttk.Label(factor_frame, text=f"Score: {current_score} - {factor_description}").grid(
+                        row=0, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                    ttk.Label(factor_frame, text=f"Weight: {self.model.factors['can_be_automated']['weight']}").grid(
+                        row=1, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                
+                row += 1
         
-        # Display factor scores
+        # Display yes/no questions if available - MOVED to appear right after can_be_automated
+        if hasattr(self.model, 'yes_no_questions') and len(self.model.yes_no_questions) > 0:
+            
+            row += 1
+            
+            for key, question_info in self.model.yes_no_questions.items():
+                current_answer = self.test.get('yes_no_answers', {}).get(key, False)
+                
+                question_frame = ttk.LabelFrame(self.scrollable_frame, text=question_info["question"])
+                question_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
+                
+                if self.is_edit_mode:
+                    # In edit mode - show checkbutton
+                    self.edit_yes_no_vars[key] = tk.BooleanVar(value=current_answer)
+                    cb = ttk.Checkbutton(
+                        question_frame,
+                        text="Yes",
+                        variable=self.edit_yes_no_vars[key]
+                    )
+                    cb.grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
+                    
+                    ttk.Label(question_frame, text=f"Impact: {question_info['impact']}").grid(
+                        row=1, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                else:
+                    # In view mode - show current value
+                    answer_text = "Yes" if current_answer else "No"
+                    ttk.Label(question_frame, text=f"Answer: {answer_text}").grid(
+                        row=0, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                    ttk.Label(question_frame, text=f"Impact: {question_info['impact']}").grid(
+                        row=1, column=0, sticky=tk.W, padx=5, pady=2
+                    )
+                
+                row += 1
+        
+        # Display factor scores - Moved AFTER yes/no questions
         ttk.Label(self.scrollable_frame, text="Score Breakdown:", font=("", 12, "underline")).grid(
             row=row, column=0, columnspan=2, sticky=tk.W, pady=10
         )
         row += 1
         
         for factor, details in self.model.factors.items():
+            # Skip "can_be_automated" as it's already displayed earlier
+            if factor == "can_be_automated":
+                continue
+                
             # For won't automate tests, skip displaying other factors if we're in view mode
-            if self.test['priority'] == "Won't Automate" and factor != "can_be_automated" and not self.is_edit_mode:
+            if self.test['priority'] == "Won't Automate" and not self.is_edit_mode:
                 continue
                 
             current_score = self.test["scores"].get(factor, 3)  # Default to 3 if missing
@@ -303,44 +378,6 @@ class TestDetailsView:
                     )
             
             row += 1
-        
-        # Display yes/no questions if available
-        if hasattr(self.model, 'yes_no_questions') and len(self.model.yes_no_questions) > 0:
-            ttk.Label(self.scrollable_frame, text="Additional Questions:", font=("", 12, "underline")).grid(
-                row=row, column=0, columnspan=2, sticky=tk.W, pady=10
-            )
-            row += 1
-            
-            for key, question_info in self.model.yes_no_questions.items():
-                current_answer = self.test.get('yes_no_answers', {}).get(key, False)
-                
-                question_frame = ttk.LabelFrame(self.scrollable_frame, text=question_info["question"])
-                question_frame.grid(row=row, column=0, columnspan=2, sticky=tk.W+tk.E, pady=5, padx=5)
-                
-                if self.is_edit_mode:
-                    # In edit mode - show checkbutton
-                    self.edit_yes_no_vars[key] = tk.BooleanVar(value=current_answer)
-                    cb = ttk.Checkbutton(
-                        question_frame,
-                        text="Yes",
-                        variable=self.edit_yes_no_vars[key]
-                    )
-                    cb.grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
-                    
-                    ttk.Label(question_frame, text=f"Impact: {question_info['impact']}").grid(
-                        row=1, column=0, sticky=tk.W, padx=5, pady=2
-                    )
-                else:
-                    # In view mode - show current value
-                    answer_text = "Yes" if current_answer else "No"
-                    ttk.Label(question_frame, text=f"Answer: {answer_text}").grid(
-                        row=0, column=0, sticky=tk.W, padx=5, pady=2
-                    )
-                    ttk.Label(question_frame, text=f"Impact: {question_info['impact']}").grid(
-                        row=1, column=0, sticky=tk.W, padx=5, pady=2
-                    )
-                
-                row += 1
         
         # Add action buttons
         button_frame = ttk.Frame(self.scrollable_frame)
