@@ -22,6 +22,7 @@ This application helps QA teams decide which manual tests to automate first by c
    - User interface layout
    - Event handling
    - User interaction
+   - Startup dialog for CSV import
 
 4. **main.py**: Application entry point
    - Initializes model and GUI
@@ -48,6 +49,7 @@ This application helps QA teams decide which manual tests to automate first by c
 - View and edit detailed test information directly in the detail view
 - Delete tests from the detail view or main screen
 - Import/export test data to/from CSV files
+- Startup dialog to quickly import tests when launching the application
 
 ### Reports
 
@@ -118,30 +120,35 @@ This application helps QA teams decide which manual tests to automate first by c
 
 ## Usage
 
-1. **Adding a test**:
+1. **Starting the Application**:
+   - When you launch the application, you'll be prompted to import tests from a CSV file
+   - Select "Yes" to open the file dialog and choose a CSV file
+   - Select "No" to start with an empty test list
+
+2. **Adding a test**:
    - Fill in the test details on the left panel
    - Set the "Can it be Automated?" factor - this determines if a test will be scored or marked as "Won't Automate"
    - Answer the yes/no questions that provide additional context
    - Set the priority factors using the radio buttons
    - Click "Add Test" button
 
-2. **Viewing tests**:
+3. **Viewing tests**:
    - All tests appear in the list on the right panel
    - Double-click a test to view details
    - Use the section filter to show tests from a specific section
 
-3. **Editing tests**:
+4. **Editing tests**:
    - Double-click a test to open the details view
    - Click "Edit Test" to modify any test details
    - Save changes when done
 
-4. **Generating reports**:
+5. **Generating reports**:
    - Access reports from the "Reports" menu
    - Choose between text-based priority report and graphical reports
    - Export reports to files for sharing
    - Open HTML reports in browser for interactive viewing
 
-5. **Importing/Exporting tests**:
+6. **Importing/Exporting tests**:
    - Use the "File" menu to import or export tests as CSV
    - CSV format includes all test details including yes/no questions
    - Useful for backing up data or transferring tests between installations
@@ -154,9 +161,15 @@ The application exports and imports tests in CSV format with the following colum
 2. Yes/No questions: Questions added directly after the Description column
 3. Scoring info: Total Score, Raw Score
 4. Factor scores: Individual scores for each prioritization factor
-5. Test ID: Unique identifier for the test
+5. Test ID: Unique internal identifier for the test used by the application
 
 ## Enhanced Features
+
+### Startup CSV Import Dialog
+- On application launch, you're prompted to import tests from a CSV file
+- This allows you to quickly load existing test data without navigating menus
+- The dialog is simple and easy to use with keyboard shortcuts (Enter for Yes, Escape for No)
+- File selection, import options, and success feedback are handled seamlessly
 
 ### Yes/No Questions
 - Add yes/no questions to provide additional context for tests
