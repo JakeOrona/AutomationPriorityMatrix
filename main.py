@@ -4,6 +4,7 @@ main.py - Main entry point for the test prioritization application
 import tkinter as tk
 from models.prioritization import TestPrioritizationModel
 from views.main_window import MainWindow
+from views.startup_dialog import StartupDialog
 
 def main():
     """
@@ -19,6 +20,9 @@ def main():
     
     # Initialize the main window with the model
     app = MainWindow(root, model)
+    
+    # Show import prompt after a short delay (allows main window to draw first)
+    root.after(200, lambda: StartupDialog(root, model, app))
     
     # Start the main event loop
     root.mainloop()
