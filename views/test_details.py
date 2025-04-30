@@ -256,6 +256,8 @@ class TestDetailsView:
             
             # Display the "Can it be automated?" factor first
             if "can_be_automated" in self.test["scores"]:
+                # The "Notes:" label is used to group factors like 'can_be_automated' for better organization
+                # and to provide a clear section header for related details.
                 ttk.Label(self.scrollable_frame, text="Notes:", font=("", 12, "underline")).grid(
                     row=row, column=0, columnspan=2, sticky=tk.W, pady=10
                 )
